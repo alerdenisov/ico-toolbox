@@ -1,0 +1,36 @@
+{
+  "name": "fastify-auth0",
+  "version": "0.0.1",
+  "description": "Coinpayments integration plugin for fastify framework",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alerdenisov/fastify-coinpayments.git"
+  },
+  "keywords": [
+    "cryptocurrencies",
+    "btc",
+    "ltc",
+    "ethereum",
+    "coinpayments",
+    "fastify"
+  ],
+  "author": "Aler Denisov <aler.zampillo@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alerdenisov/fastify-coinpayments/issues"
+  },
+  "homepage": "https://github.com/alerdenisov/fastify-coinpayments#readme",
+  "dependencies": {
+    "axios": "^0.17.1",
+    "coinpayments": "^1.1.2",
+    "fastify-env": "^0.2.0",
+    "fastify-plugin": "^0.2.1"
+  },
+  "devDependencies": {
+    "fastify": "^0.30.2",
+    "standard": "^10.0.3",
+    "tap": "^10.7.2"
+  }
+}
