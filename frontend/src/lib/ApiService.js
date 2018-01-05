@@ -4,6 +4,7 @@ let instance
 class ApiService {
   constructor () {
     this.apiDomain = process.env.API_URL || '/api'
+    console.log(`Api Domain is ${this.apiDomain}`)
     instance = instance || this
     return instance
   }
