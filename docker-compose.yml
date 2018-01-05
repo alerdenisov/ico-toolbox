@@ -1,0 +1,51 @@
+version: '2.3'
+services:
+  mongo: 
+    image: healthcheck/mongo
+    ports:
+      - 27017:27017
+      - 28017:28017
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+  frontend:
+    image: ico-toolbox/frontend
+    image: nginx
+    volumes:
+      - ./configs/nginx.conf:/tmp/default.conf
+      - ./frontend/dist:/html:ro
+    depends_on:
+      - user
+      - payments
+      # - sale
+    ports:
+      - "80:8000"
+    environment:
+      - NGINX_PORT=8000
+    command: /bin/bash -c "envsubst '$$NGINX_PORT' < /tmp/default.conf > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+    restart: on-failure
+  user:
+    image: ico-toolbox/user
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile.user
+    env_file: .env
+    links:
+      - mongo
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: on-failure
+  payments:
+    image: ico-toolbox/payments
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile.payments
+    env_file: .env
+    links:
+      - mongo
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: on-failure

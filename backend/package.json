@@ -1,0 +1,38 @@
+{
+  "name": "ico-toolkit-backend",
+  "version": "0.0.1",
+  "description": "ICO Toolkit backend writen on NodeJS with Fastify",
+  "main": "index.js",
+  "scripts": {
+    "start": "fastify app.js",
+    "microservice": "fastify",
+    "dev": "source .env.development && nodemon --exec fastify --log-level debug app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.17.1",
+    "boom": "^7.1.1",
+    "coinpayments": "^1.1.2",
+    "connect-ensure-login": "^0.1.1",
+    "cors": "^2.8.4",
+    "fastify": "^0.37.0",
+    "fastify-cli": "^0.12.0",
+    "fastify-env": "^0.2.0",
+    "fastify-jwt": "^0.1.1",
+    "fastify-mongodb": "^0.3.0",
+    "fastify-plugin": "^0.2.1",
+    "fastify-redis": "^0.3.0",
+    "fastify-static": "^0.5.0",
+    "fastify-swagger": "^0.2.0",
+    "fastseries": "^1.7.2",
+    "middie": "^3.0.0",
+    "node-forge": "^0.7.1",
+    "passport": "^0.4.0",
+    "passport-auth0": "^0.6.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.14.7"
+  }
+}
