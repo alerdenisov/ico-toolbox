@@ -19,7 +19,7 @@ services:
       - payments
       # - sale
     ports:
-      - "8080:8000"
+      - "80:8000"
     environment:
       - NGINX_PORT=8000
     command: /bin/bash -c "envsubst '$$NGINX_PORT' < /tmp/default.conf > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
