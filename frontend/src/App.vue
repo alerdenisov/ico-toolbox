@@ -14,6 +14,7 @@ en:
 
 <script>
 import { mapState } from 'vuex'
+import { ACTION_TYPES } from '@/constants'
 
 function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -42,6 +43,7 @@ export default {
       await sleep(200)
       await this.checkErrors()
       await this.checkProfile()
+      await this.checkCoins()
       this.loading = false
     },
     async checkErrors () {
@@ -54,6 +56,18 @@ export default {
       }
     },
     async checkProfile () {
+    },
+    async checkCoins () {
+      const allCoins = (await this.$api.rates(this.session)).data
+      const coins = Object.keys(allCoins).reduce((acc, ticker) => {
+        if (allCoins[ticker].accepted) {
+          acc[ticker] = allCoins[ticker]
+        }
+
+        return acc
+      }, {})
+      this.$store.dispatch(ACTION_TYPES.ReceiveCoins, coins)
+
     }
   },
 

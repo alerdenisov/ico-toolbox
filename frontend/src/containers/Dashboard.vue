@@ -1,17 +1,7 @@
 <i18n>
 en:
   hello: "Hello, {name}."
-
-  BTC: Bitcoin
-  BTC-title: Buy with Bitcoin
-  LTC: Litecoin
-  LTC-title: Buy with Litecoin
-  ETH: Ethereum
-  ETH-title: Buy with Ethereum
-  ETC: Ethereum Classic
-  ETC-title: Buy with Ethereum Classic
-  BCH: Bitcoin Cash
-  BCH-title: Buy with Bitcoin Cash
+  excange-title: "Contribute to Musereum with {0}"
 </i18n>
 
 <template lang="pug">
@@ -21,14 +11,17 @@ en:
       
     el-col(:span='16')
       el-tabs(v-model='activeCurrency')        
-        el-tab-pane(v-for='currency in currencies' :key='currency' :label='$t(currency)', :name='currency') {{ $t(`${currency}-title`) }}
+        el-tab-pane(v-for='currency in currencies' :key='currency' :label='coinName(currency)', :name='currency') 
+          span {{ $t('excange-title', [currency]) }}
       div(v-if='currencySelected')
         h2 How much ETM do you need?
         conversion-calculator(
           :leftCurrency='activeCurrency'
           rightCurrency='ETM'
-          :rate='50000'
+          :rate='coinRate(activeCurrency)'
         )
+      div
+        pre {{ rates }}
   //- div
   //-   div
   //-     a(href="/auth") Auth
@@ -87,12 +80,18 @@ export default {
 
   computed: {
     currencies () {
-      return ACCEPTED_CURRENCIES
+      return Object.keys(this.coins)
     },
     currencySelected () {
-      return !!CURRENCIES[this.activeCurrency]
+      return !!this.coins && !!this.coins[this.activeCurrency]
     },
-    ...mapState(['session', 'profile'])
+    ...mapState(['session', 'profile', 'coins'])
+  },
+
+  asyncComputed: {
+    async rates () {
+      return (await this.$api.rates(this.session)).data
+    }
   },
 
   methods: {
@@ -104,10 +103,11 @@ export default {
       this.wallet = JSON.stringify((await this.$api.wallet(this.session, currency)).data)
     },
 
-    currencyIcon (currency) {
-      return {
-        icon: CURRENCIES[currency].icon
-      }
+    coinName (currency) {
+      return this.coins[currency].name
+    },
+    coinRate (currency) {
+      return 50000 * parseFloat(this.coins[currency].rate_btc)
     }
   }
 }
