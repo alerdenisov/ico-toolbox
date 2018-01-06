@@ -1,32 +1,44 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from '@/containers/Home'
-import Authenticate from '@/containers/Authenticate'
-import AuthCallback from '@/containers/AuthCallback'
+import Welcome from '@/containers/Welcome'
+import Dashboard from '@/containers/Dashboard'
+import store from '@/store'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   routes: [
     {
       path: '/',
-      name: 'Home',
-      component: Home
+      name: 'Welcome',
+      component: Welcome
     },
     {
-      path: '/auth',
-      name: 'Authenticate',
-      component: Authenticate
-    },
-    {
-      path: '/auth/callback',
-      name: 'AuthCallback',
-      component: AuthCallback,
-      beforeEnter: (to, from, next) => {
-        console.log(arguments)
-        next()
-      }
+      path: '/dashboard',
+      name: 'Dashboard',
+      component: Dashboard
     }
   ]
 })
+
+router.beforeEach(async (to, from, next) => {
+  if (!store.state.session) {
+    if (to.path !== '/') {
+      return next({
+        path: '/',
+        query: { error: 'NotSigned' }
+      })
+    } else {
+      return next()
+    }
+  } else {
+    return next()
+  }
+})
+
+router.onError(error => {
+  console.log(this, this.$store, error)
+})
+
+export default router

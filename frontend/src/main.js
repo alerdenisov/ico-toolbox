@@ -75,6 +75,18 @@ import {
 } from 'element-ui'
 import lang from 'element-ui/lib/locale/lang/en'
 import locale from 'element-ui/lib/locale'
+import VueI18n from 'vue-i18n'
+import vueBemCn from 'vue-bem-cn'
+import AsyncComputed from 'vue-async-computed'
+import { ApiService, AuthService } from '@/lib/services'
+import injector from 'vue-inject'
+
+injector.service('$auth', AuthService)
+injector.service('$api', ApiService)
+Vue.use(injector)
+Vue.use(vueBemCn)
+Vue.use(AsyncComputed)
+Vue.use(VueI18n)
 
 // require('normalize.css')
 // configure language
@@ -142,7 +154,6 @@ Vue.use(Header)
 Vue.use(Aside)
 Vue.use(Main)
 Vue.use(Footer)
-
 Vue.use(Loading.directive)
 
 Vue.prototype.$loading = Loading.service
@@ -155,11 +166,16 @@ Vue.prototype.$message = Message
 
 Vue.config.productionTip = false
 
+const i18n = new VueI18n({
+  locale: 'en'
+})
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   store,
   router,
+  i18n,
   template: '<App/>',
   components: { App }
 })
