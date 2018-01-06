@@ -1,9 +1,9 @@
 <template lang="pug">
   div(:class='b(mods())')
     div(:class='b("side", mods("left"))')
-      currency-input(:suffix='currencyIcon(leftCurrency)' @input='leftInput' :value='left')
+      currency-input(:suffix='currentData(leftCurrency)' @input='leftInput' :value='left')
     div(:class='b("side", mods("right"))')
-      currency-input(:suffix='currencyIcon(rightCurrency)' @input='rightInput' :value='right')
+      currency-input(:suffix='currentData(rightCurrency)' @input='rightInput' :value='right')
 </template>
 
 <script>
@@ -30,11 +30,19 @@ export default {
         [element]: true
       }
     },
-    currencyIcon (currency) {
-      return {
-        ticker: currency,
-        name: CURRENCIES[currency].name,
-        icon: CURRENCIES[currency].icon
+    currentData (currency) {
+      if (currency !== 'ETM') {
+        return {
+          ticker: currency,
+          name: this.$store.state.coins[currency].name,
+          icon: `https://www.coinpayments.net/images/coins/${currency}.png`
+        }
+      } else {
+        return {
+          ticker: currency,
+          name: 'Musereum',
+          icon: 'https://www.coinpayments.net/images/coins/ETH.png'
+        }
       }
     },
 

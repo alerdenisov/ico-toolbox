@@ -30,4 +30,8 @@ export default class ApiService {
   wallet (session, currency) {
     return this._call(session, `/payments/wallet/${currency}`, 'GET')
   }
+
+  rates (session) {
+    return this._call(session, '/payments/rates', 'GET')
+  }
 }
