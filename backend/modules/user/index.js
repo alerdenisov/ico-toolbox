@@ -36,6 +36,10 @@ module.exports = async function (fastify, opts) {
       url: fastify.config.USER_MONGO_URL
     })
 
+    fastify.register(require('fastify-redis'), {
+      host: fastify.config.USER_REDIS_URL
+    })
+
     // Create our business login object and store it in fastify instance
     // Because we need `userCollection` *after* (and not only in) this plugin,
     // we need to use `fastify-plugin` to ask to `fastify` don't encapsulate `decorateWithUserCollection`
@@ -64,9 +68,14 @@ module.exports = async function (fastify, opts) {
 }
 
 async function registerRoutes (fastify, opts) {
-  fastify.get('/me', async (req, reply) => {
+  fastify.get('/login', async (req, reply) => {
+    const token = req.headers.authorization
     const profile = await fastify.auth0.profile(req.headers.authorization)
-    await fastify.userService.updateProfile(profile)
-    return await fastify.userService.getProfile(profile.sub)
+    await fastify.userService.updateProfile(profile, token)
+    return await fastify.userService.getProfile(token)
+  })
+
+  fastify.get('/me', async (req, reply) => {
+    return await fastify.userService.getProfile(req.headers.authorization)
   })
 }

@@ -15,16 +15,25 @@ function stringToOjectId (str) {
     throw new Error('Seed should be a string')
   }
 
-  var hash = sha256.create();
-  hash.update(str);
-  console.log(hash.digest().toHex().substr(0, 24))
-  return new ObjectId(hash.digest().toHex().substr(0, 24));
+  var hash = sha256.create()
+  hash.update(str)
+  return hash.digest().toHex().substr(0, 24)
 }
 
+function execRedis (redisClient, method, args) {
+  return new Promise(function (resolve, reject) {
+    args.push(function (err, result) {
+      if (err) return reject(err)
+      resolve(result)
+    })
+    redisClient[method].apply(redisClient, args)
+  })
+}
 
 class UserService {
-  constructor ({ userCollection, mongo }) {
+  constructor ({ userCollection, mongo, redis }) {
     this.userCollection = userCollection
+    this.redis = redis
     ObjectId = mongo.ObjectId
   }
 
@@ -43,9 +52,8 @@ class UserService {
     }
   }
 
-  async updateProfile (profile) {
+  async updateProfile (profile, token) {
     const sanitazedProfile = this.sanitazeProfile(profile)
-    console.log(sanitazedProfile)
     let writeResult
     try {
       writeResult = await this.userCollection.updateOne({ userId: sanitazedProfile.userId }, sanitazedProfile, { upsert: true })
@@ -59,11 +67,13 @@ class UserService {
     if (!writeResult.modifiedCount && !writeResult.upsertedCount) {
       throw boom.badRequest('Boh...')
     }
+    
+    await execRedis(this.redis, 'set', [`users:profiles:${token}`, sanitazedProfile.userId])
   }
 
-  async getProfile (sub) {
-    const _id = this.sanitazeId(sub)
-    const user = await this.userCollection.findOne({ userId: _id })
+  async getProfile (token) {
+    const userId = await execRedis(this.redis, 'get', [`users:profiles:${token}`])
+    const user = await this.userCollection.findOne({ userId })
     return user
   }
 
