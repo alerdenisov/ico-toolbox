@@ -13,15 +13,17 @@ ru:
     h1(:class='b("title", mods)') {{ $t('title') }}
     p(:class='b("subtitle", mods)') {{ $t('subtitle', ['0.0.1']) }}
     //- el-button(:class='b("auth-button", mods)' @click='showAuth') {{ $t('auth') }}
-    auth-box(@session='() => $router.push("/dashboard")')
+    auth-box(@session='gotSession')
     p(:class='b("disclaimer", mods)') {{ $t('disclaimer') }}
 </template>
 
 <script>
+import { ACTION_TYPES } from '@/constants'
 import AuthBox from '@/components/AuthBox'
 
 export default {
   name: 'welcome',
+  dependencies: ['$api'],
   props: [],
   components: {
     AuthBox
@@ -31,6 +33,14 @@ export default {
       return {
 
       }
+    }
+  },
+  methods: {
+    async gotSession (session) {
+      const profile = (await this.$api.login(session)).data
+      this.$store.dispatch(ACTION_TYPES.Authentication, session)
+      this.$store.dispatch(ACTION_TYPES.ReceiveProfile, profile)
+      this.$router.push('/dashboard')
     }
   }
 }

@@ -13,11 +13,10 @@ en:
 </template>
 
 <script>
-import { ACTION_TYPES } from '@/constants'
 import { mapState } from 'vuex'
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+function sleep (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 export default {
@@ -55,11 +54,6 @@ export default {
       }
     },
     async checkProfile () {
-      console.log('profile', !!this.session, !this.profile)
-      if (this.session && !this.profile) {
-        const profile = (await this.$api.me(this.session)).data
-        this.$store.dispatch(ACTION_TYPES.ReceiveProfile, profile)
-      }
     }
   },
 

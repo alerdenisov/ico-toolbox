@@ -11,14 +11,23 @@ export default class ApiService {
 
   _call (session, url, method, payload) {
     axios.defaults.headers.common['Authorization'] = `${session.tokenType} ${session.accessToken}`
-    return axios[method.toLowerCase()](this.apiDomain + url)
+
+    if (typeof payload === 'undefined') {
+      return axios[method.toLowerCase()](this.apiDomain + url)
+    } else {
+      return axios[method.toLowerCase()](this.apiDomain + url, payload)
+    }
+  }
+
+  login (session) {
+    return this._call(session, '/user/login', 'GET')
   }
 
   me (session) {
-    return this._call(session, '/user/me', 'GET', {})
+    return this._call(session, '/user/me', 'GET')
   }
 
   wallet (session, currency) {
-    return this._call(session, `/payments/wallet/${currency}`, 'GET', {})
+    return this._call(session, `/payments/wallet/${currency}`, 'GET')
   }
 }
