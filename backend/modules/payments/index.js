@@ -91,6 +91,18 @@ async function registerRoutes (fastify, opts) {
     })
   })
 
+  fastify.get('/rates', async (req, reply) => {
+    return new Promise((resolve, reject) => {
+      fastify.coinPayments.api.rates((err, result) => {
+        if (err) {
+          return reject(err)
+        }
+
+        return resolve(result)
+      })
+    })
+  })
+
   fastify.post('/ipn', async function (req, reply) {
     if ( !COINPAYMENTS_PRIVATE_KEY || !COINPAYMENTS_PUBLIC_KEY ) {
       throw 'Merchant ID and Merchant Secret are needed'
