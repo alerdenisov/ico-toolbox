@@ -23,7 +23,7 @@ const router = new Router({
 })
 
 router.beforeEach(async (to, from, next) => {
-  if (!store.state.session) {
+  if (!store.state.session || !store.state.profile) {
     if (to.path !== '/') {
       return next({
         path: '/',

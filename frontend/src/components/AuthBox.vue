@@ -10,7 +10,6 @@ ru:
 </template>
 
 <script>
-import { ACTION_TYPES } from '@/constants'
 export default {
   name: 'auth-box',
   dependencies: ['$auth'],
@@ -23,7 +22,6 @@ export default {
   mounted () {
     this.$auth.on('authenticated', session => {
       setTimeout(() => {
-        this.$store.dispatch(ACTION_TYPES.Authentication, session)
         this.$auth.hide()
         this.$emit('session', session)
       }, 1350)
