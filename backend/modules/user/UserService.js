@@ -1,5 +1,6 @@
 'use strict'
 
+const { execRedis } = require('../../lib/utils')
 const sha256 = require('node-forge').md.sha256
 const boom = require('boom')
 const DUPLICATE_KEY_ERROR_CODE = 11000
@@ -18,16 +19,6 @@ function stringToOjectId (str) {
   var hash = sha256.create()
   hash.update(str)
   return hash.digest().toHex().substr(0, 24)
-}
-
-function execRedis (redisClient, method, args) {
-  return new Promise(function (resolve, reject) {
-    args.push(function (err, result) {
-      if (err) return reject(err)
-      resolve(result)
-    })
-    redisClient[method].apply(redisClient, args)
-  })
 }
 
 class UserService {

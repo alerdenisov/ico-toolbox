@@ -13,6 +13,8 @@ module.exports = async function (fastify, opts) {
       type: 'object',
       required: [ 
         'PAYMENTS_MONGO_URL',
+        'PAYMENTS_REDIS_URL',
+        'USER_SERVICE_URL',
         'COINPAYMENTS_PRIVATE_KEY',
         'COINPAYMENTS_PUBLIC_KEY',
         'COINPAYMENTS_IPN', 
@@ -20,6 +22,8 @@ module.exports = async function (fastify, opts) {
       ],
       properties: {
         PAYMENTS_MONGO_URL: { type: 'string', default: 'mongodb://localhost/payments' },
+        PAYMENTS_REDIS_URL: { type: 'string', default: 'redis://127.0.0.1:6379' },
+        USER_SERVICE_URL: { type: 'string', default: 'http://localhost:3000/api/user' },
         COINPAYMENTS_PRIVATE_KEY: { type: 'string' },
         COINPAYMENTS_PUBLIC_KEY: { type: 'string' },
         COINPAYMENTS_IPN: { type: 'boolean', default: false },
@@ -43,6 +47,10 @@ module.exports = async function (fastify, opts) {
       url: fastify.config.PAYMENTS_MONGO_URL
     })
 
+    fastify.register(require('fastify-redis'), {
+      url: fastify.config.PAYMENTS_REDIS_URL
+    })
+
     // Create our business login object and store it in fastify instance
     // Because we need `paymentsCollection` *after* (and not only in) this plugin,
     // we need to use `fastify-plugin` to ask to `fastify` don't encapsulate `decorateWithpaymentsCollection`
@@ -59,6 +67,8 @@ module.exports = async function (fastify, opts) {
       require('./mongoCollectionSetup')(fastify.mongo.db, fastify.paymentsCollection, fastify.walletsCollection)
     })
 
+    fastify.register(require('../../clients/user'), fastify.config)
+
     // Add another business logic object to `fastify` instance
     // Again, `fastify-plugin` is used in order to access to `fastify.userService` from outside
     fastify.register(fp(async function (fastify, opts) {
@@ -69,6 +79,7 @@ module.exports = async function (fastify, opts) {
 
     fastify.register(registerRoutes)
   })
+  
 }
 
 async function registerRoutes (fastify, opts) {
@@ -80,29 +91,11 @@ async function registerRoutes (fastify, opts) {
   const { COINPAYMENTS_PRIVATE_KEY, COINPAYMENTS_PUBLIC_KEY } = fastify.config
 
   fastify.get('/wallet/:currency', async (req, reply) => {
-    return new Promise((resolve, reject) => {
-      fastify.coinPayments.api.getCallbackAddress(req.params.currency, (err, result) => {
-        if (err) {
-          return reject(err)
-        }
-
-        return resolve(result)
-      })
-    })
+    return fastify.paymentsService.getWallet(req.params.currency, req, reply)
   })
 
   fastify.get('/rates', async (req, reply) => {
-    return new Promise((resolve, reject) => {
-      fastify.coinPayments.api.rates({
-        accepted: 1
-      }, (err, result) => {
-        if (err) {
-          return reject(err)
-        }
-
-        return resolve(result)
-      })
-    })
+    return fastify.paymentsService.getRates(req, reply)
   })
 
   fastify.post('/ipn', async function (req, reply) {

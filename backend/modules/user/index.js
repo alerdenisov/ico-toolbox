@@ -9,12 +9,14 @@ module.exports = async function (fastify, opts) {
       type: 'object',
       required: [ 
         'USER_MONGO_URL',
+        'USER_REDIS_URL',
         'AUTH0_DOMAIN',
         'AUTH0_CLIENT_ID',
         'AUTH0_CLIENT_SECRET'
       ],
       properties: {
         USER_MONGO_URL: { type: 'string', default: 'mongodb://localhost/user' },
+        USER_REDIS_URL: { type: 'string', default: 'redis://127.0.0.1:6379' },
         AUTH0_DOMAIN: { type: 'string' },
         AUTH0_CLIENT_ID: { type: 'string' },
         AUTH0_CLIENT_SECRET: { type: 'string' }
@@ -37,7 +39,7 @@ module.exports = async function (fastify, opts) {
     })
 
     fastify.register(require('fastify-redis'), {
-      host: fastify.config.USER_REDIS_URL
+      url: fastify.config.USER_REDIS_URL
     })
 
     // Create our business login object and store it in fastify instance

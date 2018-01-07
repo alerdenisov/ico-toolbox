@@ -1,13 +1,21 @@
+<i18n>
+en:
+  attention: "Convertion rate {0} to ETM isn't fixed and depend on conversion rate {0} to BTC"
+  rate: "1 {0} is {1} ETM"
+</i18n>
 <template lang="pug">
   div(:class='b(mods())')
     div(:class='b("side", mods("left"))')
       currency-input(:suffix='currentData(leftCurrency)' @input='leftInput' :value='left')
     div(:class='b("side", mods("right"))')
       currency-input(:suffix='currentData(rightCurrency)' @input='rightInput' :value='right')
+    
+    div(:class="b('rate', mods())")
+      p {{ $t('rate', [leftCurrency, rate]) }}
+    el-alert(v-if='rate !== 50000' :title="$t('attention', [leftCurrency])" type="warning")
 </template>
 
 <script>
-import { CURRENCIES } from '@/constants'
 import CurrencyInput from '@/components/CurrencyInput'
 
 export default {

@@ -5,68 +5,108 @@ en:
 </i18n>
 
 <template lang="pug">
-  el-row(:gutter='40')
+  el-row(:gutter='20' :class="b()")
+    el-col(:span='24')
+      el-card(style='margin-bottom: 20px')
+        div(:class='b("info-row")')
+          div(:class='b("info-cell")')
+            p(:class='b("info-title")') Round Ends
+            p(:class='b("info-content")') 01 : 12 : 00 : 39
+            p(:class='b("info-help")') days hours minutes seconds
+          div(:class='b("info-cell")')
+            p(:class='b("info-title")') Round Sold
+            p(:class='b("info-content")') 6,402,121.0234 ETM
+            p(:class='b("info-help")') 3,598,032,9866 ETM left
+          div(:class='b("info-cell")')
+            p(:class='b("info-title")') Round Raised
+            p(:class='b("info-content")') 164.4234 BTC
+            p(:class='b("info-help")') from 513 transitions
     el-col(:span='8')
-      h2 {{ $t('hello', profile )}}
+      el-card
+        h2 Sale Info
+
+        table
+          tr
+            td
+              h4 Deadline
+            td
+              p 10.02.2018
+          tr
+            td
+              h4 Hard cap
+            td
+              p 10,000,000.00 ETM (200 BTC)
+          tr
+            td(colspan='2')
+              h4 Prices
+          tr(v-for='currency in currencies')
+            td
+              h4 1 {{ currency }}
+            td
+              vue-numeric(
+                currency='ETM' 
+                currency-symbol-position='suffix' 
+                separator=','
+                :value='coinRate(currency)' 
+                :precision='4' 
+                :disabled='true')
+        
+        el-progress(:text-inside="true" :stroke-width="18" :percentage="2" status="exception")
+        
+
+      //- el-table(:data='saleInfo', style='width: 100%')
+      //-   el-table-column(prop='date', label='Date', width='180')
+      //-   el-table-column(prop='name', label='Name', width='180')
+      //-   el-table-column(prop='address', label='Address')
       
     el-col(:span='16')
-      el-tabs(v-model='activeCurrency')        
-        el-tab-pane(v-for='currency in currencies' :key='currency' :label='coinName(currency)', :name='currency') 
-          span {{ $t('excange-title', [currency]) }}
-      div(v-if='currencySelected')
+      el-card
+        h2 Select contribution currency
+        div(style='display: flex; flex-wrap: wrap')
+          currency-button(v-for='currency in currencies' :key='currency' :ticker='currency' @click='activeCurrency = currency' :selected='activeCurrency === currency')
+
+        //- el-button(v-for='currency in currencies' :key='currency') 
+        //-   img(:src='coinData(currency).icon')
+        //-   span {{ coinData(currency).name }}
+        //- el-tabs(v-model='activeCurrency')        
+          el-tab-pane(v-for='currency in currencies' :key='currency' :label='coinName(currency)', :name='currency') 
+            //- p {{ $t('excange-title', [currency]) }}
+      el-card(v-if='currencySelected')
         h2 How much ETM do you need?
         conversion-calculator(
           :leftCurrency='activeCurrency'
           rightCurrency='ETM'
           :rate='coinRate(activeCurrency)'
         )
-      div
-        pre {{ rates }}
-  //- div
-  //-   div
-  //-     a(href="/auth") Auth
-  //-   el-button(@click='me') Get my profile
-  //-   el-button(@click='() => getWallet("BTC")') Get BTC Wallet
-  //-   el-button(@click='() => getWallet("LTC")') Get LTC Wallet
-  //-   el-button(@click='() => getWallet("ETH")') Get ETH Wallet
-  //-   el-button(@click='() => getWallet("ETC")') Get ETC Wallet
-  //-   el-button(@click='() => getWallet("LTCT")') Get LTCT Wallet
-  //-   el-input(:value='wallet' v-if='wallet')
-  //-   div(v-if='profile')
-  //-     table
-  //-       tr
-  //-         td Id:
-  //-         td {{ profile.userId }}
-  //-       tr
-  //-         td Email:
-  //-         td 
-  //-           span {{ profile.email }}
-  //-       tr
-  //-         td Name:
-  //-         td {{ profile.name }}
-  //-       tr
-  //-         td Nickname:
-  //-         td {{ profile.nickname }}
-  //-       tr
-  //-         td Picture:
-  //-         td 
-  //-           img(:src='profile.picture_large || profile.picture')
-  //-       tr
-  //-         td Gender:
-  //-         td {{ profile.gender }}
+      el-card(v-if='currencySelected')
+        h4 Send your {{ activeCurrency }} to address:
+        deposit-wallet(:ticker='activeCurrency')
+
+      el-card(style='margin-top: 20px')
+        h2 Transactions
+        
+        el-tabs(v-model='activeCurrency')        
+          el-tab-pane(label='Your', name='your')
+          el-tab-pane(label='100 latest', name='latest')
 </template>
 
 <script>
 import { mapState } from 'vuex'
-import { CURRENCIES, ACCEPTED_CURRENCIES } from '@/constants'
+
+import VueNumeric from 'vue-numeric'
 import ConversionCalculator from '@/components/ConversionCalculator'
+import DepositWallet from '@/components/DepositWallet'
+import CurrencyButton from '@/components/CurrencyButton'
 
 export default {
   name: 'dashboard',
   dependencies: ['$api'],
 
   components: {
-    'conversion-calculator': ConversionCalculator
+    'conversion-calculator': ConversionCalculator,
+    DepositWallet,
+    CurrencyButton,
+    VueNumeric
   },
 
   data () {
@@ -95,16 +135,20 @@ export default {
   },
 
   methods: {
-    // async me () {
-    //   this.profile = (await this.$api.me(this.session)).data
-    // },
-
-    async getWallet (currency) {
-      this.wallet = JSON.stringify((await this.$api.wallet(this.session, currency)).data)
-    },
-
-    coinName (currency) {
-      return this.coins[currency].name
+    coinData (currency) {
+      if (currency !== 'ETM') {
+        return {
+          ticker: currency,
+          name: this.$store.state.coins[currency].name,
+          icon: `https://www.coinpayments.net/images/coins/${currency}.png`
+        }
+      } else {
+        return {
+          ticker: currency,
+          name: 'Musereum',
+          icon: 'https://www.coinpayments.net/images/coins/ETH.png'
+        }
+      }
     },
     coinRate (currency) {
       return 50000 * parseFloat(this.coins[currency].rate_btc)
@@ -112,5 +156,38 @@ export default {
   }
 }
 </script>
-<style>
+<style lang="scss">
+.dashboard {
+  &__info {
+    &-row {
+      display: flex;
+    }
+
+    &-cell {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    &-help, &-title, &-content {
+      margin: 0;
+    }
+
+    &-help,
+    &-title {
+      text-align: center;
+      color: #8EABC4;
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    &-content {
+      font-size: 170%;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+  }
+}
 </style>

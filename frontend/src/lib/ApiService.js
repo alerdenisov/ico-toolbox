@@ -10,7 +10,9 @@ export default class ApiService {
   }
 
   _call (session, url, method, payload) {
-    axios.defaults.headers.common['Authorization'] = `${session.tokenType} ${session.accessToken}`
+    if (session && session.tokenType && session.accessToken) {
+      axios.defaults.headers.common['Authorization'] = `${session.tokenType} ${session.accessToken}`
+    }
 
     if (typeof payload === 'undefined') {
       return axios[method.toLowerCase()](this.apiDomain + url)
@@ -31,7 +33,7 @@ export default class ApiService {
     return this._call(session, `/payments/wallet/${currency}`, 'GET')
   }
 
-  rates (session) {
-    return this._call(session, '/payments/rates', 'GET')
+  rates () {
+    return this._call(null, '/payments/rates', 'GET')
   }
 }

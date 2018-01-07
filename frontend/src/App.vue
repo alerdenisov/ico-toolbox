@@ -58,16 +58,15 @@ export default {
     async checkProfile () {
     },
     async checkCoins () {
-      const allCoins = (await this.$api.rates(this.session)).data
+      const allCoins = (await this.$api.rates()).data
       const coins = Object.keys(allCoins).reduce((acc, ticker) => {
-        if (allCoins[ticker].accepted) {
+        if (allCoins[ticker].accepted && allCoins[ticker].status === 'online') {
           acc[ticker] = allCoins[ticker]
         }
 
         return acc
       }, {})
       this.$store.dispatch(ACTION_TYPES.ReceiveCoins, coins)
-
     }
   },
 
@@ -92,8 +91,8 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6, p {
-  margin-top: 0;
-  margin-bottom: 0.7em;
+  margin-top: 0.3em;
+  margin-bottom: 1.2em;
 }
 
 .auth0-lock-header { height: 80px !important; }
@@ -102,6 +101,15 @@ h1, h2, h3, h4, h5, h6, p {
 .auth0-lock-name,
 .auth0-lock-badge-bottom {
     display: none;
+}
+
+.el-card {
+  box-shadow: none;
+  transition: box-shadow 0.5s ease;
+
+  &:hover {
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+  }
 }
 
 .app {

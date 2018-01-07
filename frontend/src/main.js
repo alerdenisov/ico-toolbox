@@ -88,7 +88,7 @@ Vue.use(vueBemCn)
 Vue.use(AsyncComputed)
 Vue.use(VueI18n)
 
-// require('normalize.css')
+require('normalize.css')
 // configure language
 locale.use(lang)
 
