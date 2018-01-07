@@ -78,6 +78,15 @@ class PaymentsService {
       })
     })
   }
+
+  async transactionEvent(event) {
+    const { status } = event
+    const isFailed = status < 0
+    const isPending = !isFailed && status < 100
+    const isComplete = status === 100
+
+    
+  }
 }
 
 module.exports = PaymentsService

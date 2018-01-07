@@ -124,26 +124,8 @@ async function registerRoutes (fastify, opts) {
     if (hmac != req.headers.hmac) {
       return boom.badRequest(`Coinpayments Invalid Request`)
     }
-    if (req.body.status < 0) {
-      console.log('ipn_fail', req.body)
-      return reply
-        .code(204)
-        .header('Content-Type', 'application/json')
-        .send()
-    }
-    if (req.body.status < 100) {
-      console.log('ipn_pending', req.body)
-      return reply
-        .code(204)
-        .header('Content-Type', 'application/json')
-        .send()
-    }
-    if (req.body.status == 100) {
-      console.log('ipn_complete', req.body)
-      return reply
-        .code(204)
-        .header('Content-Type', 'application/json')
-        .send()
-    }
+
+    fastify.paymentsService.transactionEvent(req.body)
+    return reply.code(204).header('Content-Type', 'application/json').send()
   })
 }
