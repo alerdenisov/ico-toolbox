@@ -1,3 +1,4 @@
+const ws = require('../../lib/fastify-ws')
 const fp = require('fastify-plugin')
 const qs = require('querystring')
 const crypto = require('crypto')
@@ -15,6 +16,8 @@ module.exports = async function (fastify, opts) {
         'PAYMENTS_MONGO_URL',
         'PAYMENTS_REDIS_URL',
         'USER_SERVICE_URL',
+        'SALE_SERVICE_URL',
+        'SALE_SERVICE_SECRET',
         'COINPAYMENTS_PRIVATE_KEY',
         'COINPAYMENTS_PUBLIC_KEY',
         'COINPAYMENTS_IPN', 
@@ -24,6 +27,8 @@ module.exports = async function (fastify, opts) {
         PAYMENTS_MONGO_URL: { type: 'string', default: 'mongodb://localhost/payments' },
         PAYMENTS_REDIS_URL: { type: 'string', default: 'redis://127.0.0.1:6379' },
         USER_SERVICE_URL: { type: 'string', default: 'http://localhost:3000/api/user' },
+        SALE_SERVICE_URL: { type: 'string', default: 'http://localhost:3000/api/sale' },
+        SALE_SERVICE_SECRET: { type: 'string' },
         COINPAYMENTS_PRIVATE_KEY: { type: 'string' },
         COINPAYMENTS_PUBLIC_KEY: { type: 'string' },
         COINPAYMENTS_IPN: { type: 'boolean', default: false },
@@ -68,6 +73,7 @@ module.exports = async function (fastify, opts) {
     })
 
     fastify.register(require('../../clients/user'), fastify.config)
+    fastify.register(require('../../clients/sale'), fastify.config)
 
     // Add another business logic object to `fastify` instance
     // Again, `fastify-plugin` is used in order to access to `fastify.userService` from outside
@@ -137,7 +143,7 @@ async function registerRoutes (fastify, opts) {
       return boom.badRequest(`Coinpayments Invalid Request`)
     }
 
-    fastify.paymentsService.transactionEvent(req.body, req, reply)
-    return reply.code(204).header('Content-Type', 'application/json').send()
+    reply.code(204).header('Content-Type', 'application/json').send()
+    await fastify.paymentsService.transactionEvent(req.body, req, reply)
   })
 }

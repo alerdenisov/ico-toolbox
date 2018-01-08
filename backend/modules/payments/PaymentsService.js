@@ -29,6 +29,7 @@ class PaymentsService {
       paymentsCollection, 
       walletsCollection, 
       userClient,
+      saleClient,
       coinPayments,
       mongo, 
       redis } = fastify
@@ -37,6 +38,7 @@ class PaymentsService {
     this.redis = redis
     this.coinPayments = coinPayments
     this.userClient = userClient
+    this.saleClient = saleClient
     ObjectId = mongo.ObjectId
   }
 
@@ -139,8 +141,8 @@ class PaymentsService {
       btcAmount: amount * btcRate
     }
 
-    req.log.info('transaction', transaction)
-    console.log(transaction)
+    // req.log.info('transaction', transaction)
+    // console.log(transaction)
 
     // Dont wait to store finalize
     this.paymentsCollection.updateOne({ txId: txn_id }, transaction, {
@@ -150,6 +152,10 @@ class PaymentsService {
     await execRedis(this.redis, 'zadd', [`payments:transactions`, Date.now(), txn_id])
     await execRedis(this.redis, 'zadd', [`payments:transactions:${userId}`, Date.now(), txn_id])
     await execRedis(this.redis, 'set', [`payments:transaction:${txn_id}`, JSON.stringify(transaction)])
+
+    transaction.userId = transaction.userId.toString()
+    await this.saleClient.notifyTransaction(transaction)
+    return transaction
   }
 }
 
