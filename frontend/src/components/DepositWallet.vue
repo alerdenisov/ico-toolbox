@@ -48,7 +48,10 @@ export default {
       this.loading = false
     },
     async getWallet () {
+      this.wallet = null
+      this.loading = true
       this.wallet = (await this.$api.getWallet(this.session, this.ticker)).data
+      this.loading = false
     },
     async updateWallet () {
       await this.getWallet()
