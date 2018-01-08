@@ -1,7 +1,13 @@
+<i18n>
+en:
+  warning: "Send cryptocurrencies only on address shown above! 
+  Don't try to send on any address received from non-official sources!"
+</i18n>
 <template lang="pug">
   div(:class="b()" v-loading="loading")
     span(:class="b('address')") {{ address }}
-    el-alert(title="Send cryptocurrencies only on address shown above! Don't try to send on any address received from non-official sources!" type="warning")
+    el-button(@click='createWallet' v-if='wallet') Regenerate
+    el-alert(:title='$t("warning")' type="warning" v-if='wallet')
 </template>
 <script>
 import { mapState } from 'vuex'
@@ -18,7 +24,8 @@ export default {
   computed: {
     address () {
       if (this.wallet) {
-        return this.ticker === 'BTC' ? this.wallet.pubkey : this.wallet.address
+        // return this.ticker === 'BTC' ? this.wallet.pubkey : this.wallet.address
+        return this.wallet.address
       }
 
       return 'Generating...'
@@ -34,11 +41,20 @@ export default {
     this.updateWallet()
   },
   methods: {
-    async updateWallet () {
+    async createWallet () {
       this.wallet = null
       this.loading = true
-      this.wallet = (await this.$api.wallet(this.session, this.ticker)).data
+      this.wallet = (await this.$api.createWallet(this.session, this.ticker)).data
       this.loading = false
+    },
+    async getWallet () {
+      this.wallet = (await this.$api.getWallet(this.session, this.ticker)).data
+    },
+    async updateWallet () {
+      await this.getWallet()
+      if (!this.wallet || !this.wallet.expireAt || this.wallet.expireAt < new Date().getTime() / 1000) {
+        await this.createWallet()
+      }
     }
   }
 }

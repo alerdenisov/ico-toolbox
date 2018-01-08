@@ -87,7 +87,9 @@ en:
         
         el-tabs(v-model='activeCurrency')        
           el-tab-pane(label='Your', name='your')
+            transaction-table(:transactions='myTransactions')
           el-tab-pane(label='100 latest', name='latest')
+            transaction-table(:transactions='transactions')
 </template>
 
 <script>
@@ -97,6 +99,7 @@ import VueNumeric from 'vue-numeric'
 import ConversionCalculator from '@/components/ConversionCalculator'
 import DepositWallet from '@/components/DepositWallet'
 import CurrencyButton from '@/components/CurrencyButton'
+import TransactionTable from '@/components/TransactionTable'
 
 export default {
   name: 'dashboard',
@@ -105,6 +108,7 @@ export default {
   components: {
     'conversion-calculator': ConversionCalculator,
     DepositWallet,
+    TransactionTable,
     CurrencyButton,
     VueNumeric
   },
@@ -131,6 +135,14 @@ export default {
   asyncComputed: {
     async rates () {
       return (await this.$api.rates(this.session)).data
+    },
+
+    async transactions () {
+      return (await this.$api.transactions(this.session)).data
+    },
+
+    async myTransactions () {
+      return (await this.$api.myTransactions(this.session)).data
     }
   },
 

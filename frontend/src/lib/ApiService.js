@@ -29,8 +29,20 @@ export default class ApiService {
     return this._call(session, '/user/me', 'GET')
   }
 
-  wallet (session, currency) {
+  getWallet (session, currency) {
     return this._call(session, `/payments/wallet/${currency}`, 'GET')
+  }
+
+  createWallet (session, currency) {
+    return this._call(session, `/payments/wallet/${currency}/create`, 'GET')
+  }
+
+  transactions (session) {
+    return this._call(session, `/payments/transactions`, 'GET')
+  }
+  
+  myTransactions (session) {
+    return this._call(session, `/payments/transactions/my`, 'GET')
   }
 
   rates () {
