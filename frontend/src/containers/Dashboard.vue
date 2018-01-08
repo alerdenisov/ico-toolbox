@@ -8,19 +8,7 @@ en:
   el-row(:gutter='20' :class="b()")
     el-col(:span='24')
       el-card(style='margin-bottom: 20px')
-        div(:class='b("info-row")')
-          div(:class='b("info-cell")')
-            p(:class='b("info-title")') Round Ends
-            p(:class='b("info-content")') 01 : 12 : 00 : 39
-            p(:class='b("info-help")') days hours minutes seconds
-          div(:class='b("info-cell")')
-            p(:class='b("info-title")') Round Sold
-            p(:class='b("info-content")') 6,402,121.0234 ETM
-            p(:class='b("info-help")') 3,598,032,9866 ETM left
-          div(:class='b("info-cell")')
-            p(:class='b("info-title")') Round Raised
-            p(:class='b("info-content")') 164.4234 BTC
-            p(:class='b("info-help")') from 513 transitions
+        sale-info
     el-col(:span='8')
       el-card
         h2 Sale Info
@@ -100,6 +88,7 @@ import ConversionCalculator from '@/components/ConversionCalculator'
 import DepositWallet from '@/components/DepositWallet'
 import CurrencyButton from '@/components/CurrencyButton'
 import TransactionTable from '@/components/TransactionTable'
+import SaleInfo from '@/components/SaleInfo'
 
 export default {
   name: 'dashboard',
@@ -110,6 +99,7 @@ export default {
     DepositWallet,
     TransactionTable,
     CurrencyButton,
+    SaleInfo,
     VueNumeric
   },
 
@@ -170,36 +160,5 @@ export default {
 </script>
 <style lang="scss">
 .dashboard {
-  &__info {
-    &-row {
-      display: flex;
-    }
-
-    &-cell {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    &-help, &-title, &-content {
-      margin: 0;
-    }
-
-    &-help,
-    &-title {
-      text-align: center;
-      color: #8EABC4;
-      text-transform: uppercase;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    &-content {
-      font-size: 170%;
-      font-weight: bold;
-      margin: 20px 0;
-    }
-  }
 }
 </style>

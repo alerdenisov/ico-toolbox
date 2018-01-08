@@ -16,10 +16,6 @@ en:
 import { mapState } from 'vuex'
 import { ACTION_TYPES } from '@/constants'
 
-function sleep (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
 export default {
   name: 'app',
   dependencies: ['$api'],
@@ -40,9 +36,7 @@ export default {
   methods: {
     async checkState () {
       this.loading = true
-      await sleep(200)
       await this.checkErrors()
-      await this.checkProfile()
       await this.checkCoins()
       this.loading = false
     },
@@ -54,8 +48,6 @@ export default {
           message: this.$t(this.$route.query.error)
         })
       }
-    },
-    async checkProfile () {
     },
     async checkCoins () {
       const allCoins = (await this.$api.rates()).data

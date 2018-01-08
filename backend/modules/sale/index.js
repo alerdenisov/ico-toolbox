@@ -46,6 +46,12 @@ module.exports = async function (fastify, opts) {
 
     fastify.register(require('../../clients/user'), fastify.config)
 
+    fastify.register(fp(async function (fastify, opts) {
+      const SaleService = require('./SaleService.js')
+      const saleService = new SaleService(fastify)
+      fastify.decorate('saleService', saleService)
+    }))
+
     fastify.register(registerRoutes)
   })
 }
@@ -57,13 +63,15 @@ async function registerRoutes (fastify, opts) {
     if (hmac !== req.headers.hmac) {
       return Boom.forbidden('Incorrect message signature')
     }
-    
+
     // TODO: ship tokens
   })
 
-  fastify.get('/me', async (req, reply) => {
-    const profile = await fastify.auth0.profile(req.headers.authorization)
-    await fastify.userService.updateProfile(profile)
-    return await fastify.userService.getProfile(profile.sub)
+  fastify.get('/info', async (req, reply) => {
+    return await fastify.saleService.getInfo(req, reply)
+  })
+
+  fastify.get('/progress', async (req, reply) => {
+    return await fastify.saleService.getProgress(req, reply)
   })
 }

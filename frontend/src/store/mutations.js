@@ -9,5 +9,11 @@ export default {
   },
   [MUTATION_TYPES.ReceiveCoins] (state, coins) {
     state.coins = coins
+  },
+  [MUTATION_TYPES.SaleInfo] (state, info) {
+    state.saleInfo = info
+  },
+  [MUTATION_TYPES.SaleProgress] (state, progress) {
+    state.saleProgress = progress
   }
 }

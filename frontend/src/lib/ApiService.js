@@ -40,12 +40,19 @@ export default class ApiService {
   transactions (session) {
     return this._call(session, `/payments/transactions`, 'GET')
   }
-  
   myTransactions (session) {
     return this._call(session, `/payments/transactions/my`, 'GET')
   }
 
   rates () {
     return this._call(null, '/payments/rates', 'GET')
+  }
+
+  info (session) {
+    return this._call(session, '/sale/info', 'GET')
+  }
+
+  progress (session) {
+    return this._call(session, '/sale/progress', 'GET')
   }
 }
