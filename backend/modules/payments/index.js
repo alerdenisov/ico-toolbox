@@ -94,6 +94,18 @@ async function registerRoutes (fastify, opts) {
     return fastify.paymentsService.getWallet(req.params.currency, req, reply)
   })
 
+  fastify.get('/wallet/:currency/create', async (req, reply) => {
+    return fastify.paymentsService.createWallet(req.params.currency, req, reply)
+  })
+
+  fastify.get('/transactions/my', async (req, reply) => {
+    return fastify.paymentsService.getUserTransactions(req, reply)
+  })
+
+  fastify.get('/transactions', async (req, reply) => {
+    return fastify.paymentsService.getTransactions(req, reply)
+  })
+
   fastify.get('/rates', async (req, reply) => {
     return fastify.paymentsService.getRates(req, reply)
   })
@@ -125,7 +137,7 @@ async function registerRoutes (fastify, opts) {
       return boom.badRequest(`Coinpayments Invalid Request`)
     }
 
-    fastify.paymentsService.transactionEvent(req.body)
+    fastify.paymentsService.transactionEvent(req.body, req, reply)
     return reply.code(204).header('Content-Type', 'application/json').send()
   })
 }

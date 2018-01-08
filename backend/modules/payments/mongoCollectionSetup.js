@@ -18,14 +18,20 @@ module.exports = async function (db, paymentsCollection, walletsCollection) {
   await db.command({
     'collMod': paymentsName,
     validator: {
-      wallet: { $type: 'object' },
-      'wallet._id': { $type: 'objectId' },
-      'wallet.currency': { $type: 'string' },
-      amount: { $type: 'number' }
+      // 'walletId': { $type: 'objectId' },
+      userId: { $type: 'objectId' },
+      txId: { $type: 'string' },
+      currency: { $type: 'string' },
+      status: { $type: 'number' },
+      address: { $type: 'string' },
+      btcRate: { $type: 'number' },
+      amount: { $type: 'number' },
+      btcAmount: { $type: 'number' }
     }
   })
 
   await walletsCollection.createIndex({ 'userId': 1 })
   await walletsCollection.createIndex({ 'currency': 2 })
-  await paymentsCollection.createIndex({ 'wallet._id': 2 })
+  await paymentsCollection.createIndex({ 'txId': 1 })
+  await paymentsCollection.createIndex({ 'userId': 2 })
 }
