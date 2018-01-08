@@ -29,6 +29,7 @@ class PaymentsService {
       paymentsCollection, 
       walletsCollection, 
       userClient,
+      saleClient,
       coinPayments,
       mongo, 
       redis } = fastify
@@ -37,10 +38,11 @@ class PaymentsService {
     this.redis = redis
     this.coinPayments = coinPayments
     this.userClient = userClient
+    this.saleClient = saleClient
     ObjectId = mongo.ObjectId
   }
 
-  async getCallbackAddress(currency) {
+  async getCallbackAddress(currency, req, reply) {
     return new Promise((resolve, reject) => {
       this.coinPayments.api.getCallbackAddress(currency, (err, result) => {
         if (err) {
@@ -53,14 +55,28 @@ class PaymentsService {
 
   async getWallet(currency, req, reply) {
     const user = await this.userClient.getUser(req)
-    console.log(`payments:${user._id}:${currency}`)
-    let wallet = await execRedis(this.redis, 'get', [`payments:${user._id}:${currency}`])
-    if(wallet) {
-      return wallet
+    return await execRedis(this.redis, 'get', [`payments:${user._id}:${currency}`])
+  }
+
+  async createWallet(currency, req, reply) {
+    const user = await this.userClient.getUser(req)
+    const rates = await this.getRates(req, reply)
+
+    if (!rates[currency] || rates[currency].status !== 'online' || rates[currency].accepted !== 1) {
+      return Boom.badRequest('Target currency isn\'t accepting')
     }
-    wallet = JSON.stringify((await this.getCallbackAddress(currency)))
-    console.log(wallet)
-    await execRedis(this.redis, 'set', [`payments:${user._id}:${currency}`, wallet])
+
+    let wallet = await this.getCallbackAddress(currency)
+
+    // store current rate in wallet record
+    wallet.rate_btc = parseFloat(rates[currency].rate_btc)
+    wallet.expireAt = new Date().getTime() / 1000
+
+    // Set lifetime of wallet on 1 hour
+    await execRedis(this.redis, 'set', [`payments:${user._id}:${currency}`, JSON.stringify(wallet), 'EX', 60 * 60])
+
+    // Store user generated wallet forever (just for case if someone will send money after expired time) 
+    await execRedis(this.redis, 'set', [`payments:wallets:${wallet.address}`, user._id])
 
     return wallet
   }
@@ -77,6 +93,69 @@ class PaymentsService {
         return resolve(result)
       })
     })
+  }
+
+  async getUserTransactions(req, reply) {
+    const user = await this.userClient.getUser(req)
+    const userTxs = await this.paymentsCollection.find({ userId: ObjectId.createFromHexString(user._id) }).toArray()
+    console.log(userTxs)
+    return userTxs
+  }
+
+  async getTransactions(req, reply) {
+    return await this.paymentsCollection.find({}).limit(100).toArray()
+  }
+
+  async transactionEvent(event, req, reply) {
+    const { status, txn_id, address, amount, currency } = event
+    const isFailed = status < 0
+    const isPending = !isFailed && status < 100
+    const isComplete = status === 100
+
+    const userId = ObjectId.createFromHexString(await execRedis(this.redis, 'get', [`payments:wallets:${address}`]))
+
+    if (!userId) {
+      // TODO: save log of unknown user transaction (how it could be possible?)
+    }
+
+    const walletData = await execRedis(this.redis, 'get', [`payments:${userId}:${currency}`])
+    let btcRate = 0
+
+    if (walletData) {
+      btcRate = JSON.parse(walletData).rate_btc
+      req.log.info(`found unexpired wallet. Rate is ${btcRate}`)
+    } else {
+      const rates = await this.getRates(req, reply)
+      btcRate = parseFloat(rates[currency].rate_btc)
+      req.log.info(`Wallet expired. Current rate is ${btcRate}`)
+    }
+
+    const transaction = {
+      txId: txn_id,
+      currency,
+      status,
+      address,
+      userId,
+      btcRate,
+      amount,
+      btcAmount: amount * btcRate
+    }
+
+    // req.log.info('transaction', transaction)
+    // console.log(transaction)
+
+    // Dont wait to store finalize
+    this.paymentsCollection.updateOne({ txId: txn_id }, transaction, {
+      upsert: true
+    })
+
+    await execRedis(this.redis, 'zadd', [`payments:transactions`, Date.now(), txn_id])
+    await execRedis(this.redis, 'zadd', [`payments:transactions:${userId}`, Date.now(), txn_id])
+    await execRedis(this.redis, 'set', [`payments:transaction:${txn_id}`, JSON.stringify(transaction)])
+
+    transaction.userId = transaction.userId.toString()
+    await this.saleClient.notifyTransaction(transaction)
+    return transaction
   }
 }
 

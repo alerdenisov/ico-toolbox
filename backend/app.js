@@ -34,5 +34,6 @@ module.exports = async function (fastify, opts) {
     })
     .register(require('./modules/user'), { prefix: '/api/user' })
     .register(require('./modules/payments'), { prefix: '/api/payments'})
+    .register(require('./modules/sale'), { prefix: '/api/sale'})
     .register(require('fastify-swagger'), swaggerOption)
 }
