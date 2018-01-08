@@ -9,6 +9,7 @@ export default {
   },
   [MUTATION_TYPES.ReceiveCoins] (state, coins) {
     state.coins = coins
+    state.coinsUpdate = Math.floor(new Date().getTime() / 1000)
   },
   [MUTATION_TYPES.SaleInfo] (state, info) {
     state.saleInfo = info

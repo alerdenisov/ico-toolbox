@@ -13,6 +13,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "accounting-js": "^1.1.1",
     "auth0-js": "^9.0.2",
     "auth0-lock": "^11.0.1",
     "axios": "^0.17.1",

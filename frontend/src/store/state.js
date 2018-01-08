@@ -8,8 +8,9 @@ export default {
     softCap: 0,
     priceBTC: 0
   },
-  coins: {},
-  profile: {},
+  coins: null,
+  coinsUpdate: 0,
+  profile: null,
   saleProgress: {
     sold: 0,
     raised: 0

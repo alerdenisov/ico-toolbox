@@ -4,9 +4,18 @@ en:
 </i18n>
 <template lang="pug">
   el-container(:class='b()' v-loading='loading')
-    el-header(:class='b("header-wrapper")') Header
+    el-header(:class='b("header-wrapper")')
     el-container(:class='b("screen-wrapper")')
-      //- el-aside(width='200px') Aside
+      el-aside(:class='b("sidebar")')
+        user-badge
+        el-menu(
+          :class='b("menu")'
+          :router='true'
+          mode='vertical')
+          el-menu-item(index='dashboard' route='/dashboard') Sale
+          el-menu-item(index='contribute' route='/contribute') Contribute
+          el-menu-item(index='affilate' route='/affilate') Affilate
+          el-menu-item(index='transactions' route='/transactions') Transactions
       el-main(:class='b("screen")')
         div(:class='b("content")')
           router-view(:class='b("view")')
@@ -16,9 +25,15 @@ en:
 import { mapState } from 'vuex'
 import { ACTION_TYPES } from '@/constants'
 
+import UserBadge from '@/components/UserBadge'
+
 export default {
   name: 'app',
   dependencies: ['$api'],
+
+  components: {
+    UserBadge
+  },
 
   data () {
     return {
@@ -29,7 +44,9 @@ export default {
   computed: {
     ...mapState([
       'session',
-      'profile'
+      'profile',
+      'coins',
+      'coinsUpdate'
     ])
   },
 
@@ -50,20 +67,24 @@ export default {
       }
     },
     async checkCoins () {
-      const allCoins = (await this.$api.rates()).data
-      const coins = Object.keys(allCoins).reduce((acc, ticker) => {
-        if (allCoins[ticker].accepted && allCoins[ticker].status === 'online') {
-          acc[ticker] = allCoins[ticker]
-        }
+      const now = Math.floor(new Date().getTime() / 1000)
+      if (!this.coins || now > this.coinsUpdate + 30) {
+        const allCoins = (await this.$api.rates()).data
+        const coins = Object.keys(allCoins).reduce((acc, ticker) => {
+          if (allCoins[ticker].accepted && allCoins[ticker].status === 'online') {
+            acc[ticker] = allCoins[ticker]
+          }
 
-        return acc
-      }, {})
-      this.$store.dispatch(ACTION_TYPES.ReceiveCoins, coins)
+          return acc
+        }, {})
+        this.$store.dispatch(ACTION_TYPES.ReceiveCoins, coins)
+      }
     }
   },
 
   mounted () {
     this.checkState()
+    console.log(this.$route)
   },
 
   watch: {
@@ -105,15 +126,21 @@ h1, h2, h3, h4, h5, h6, p {
 }
 
 .app {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
+  // position: fixed;
+  // left: 0;
+  // right: 0;
+  // top: 0;
+  // bottom: 0;
 
   background-color: #ECF5FD;
-  display: flex;
-  justify-content: center;
+  // display: flex;
+  // justify-content: center;
+
+  min-height: 100vh;
+  
+  &__menu {
+    border: 0;
+  }
 
   &__header-wrapper {
     height: 60px;
@@ -130,6 +157,12 @@ h1, h2, h3, h4, h5, h6, p {
     display: flex;
     flex-direction: column;
     // justify-content: center;
+  }
+
+  &__sidebar {
+    background-color: white;
+    border-right: 1px solid #ebeef5;
+    // padding: 20px
   }
 }
 </style>

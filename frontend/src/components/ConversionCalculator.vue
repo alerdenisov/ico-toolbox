@@ -6,23 +6,30 @@ en:
 <template lang="pug">
   div(:class='b(mods())')
     div(:class='b("side", mods("left"))')
-      currency-input(:suffix='currentData(leftCurrency)' @input='leftInput' :value='left')
+      currency-input(:class="b('input', mods('left'))" :suffix='currentData(leftCurrency)' @input='leftInput' :value='left')
     div(:class='b("side", mods("right"))')
-      currency-input(:suffix='currentData(rightCurrency)' @input='rightInput' :value='right')
+      currency-input(:class="b('input', mods('right'))" :suffix='currentData(rightCurrency)' @input='rightInput' :value='right')
     
     div(:class="b('rate', mods())")
-      p {{ $t('rate', [leftCurrency, rate]) }}
+      p
+        currency-label(:ticker='leftCurrency' :value='1' :precision='2')
+        | 
+        span is
+        | 
+        currency-label(ticker='ETM' :value='rate' :precision='4')
     el-alert(v-if='rate !== 50000' :title="$t('attention', [leftCurrency])" type="warning")
 </template>
 
 <script>
 import CurrencyInput from '@/components/CurrencyInput'
+import CurrencyLabel from '@/components/CurrencyLabel'
 
 export default {
   name: 'conversion-calculator',
   props: ['leftCurrency', 'rightCurrency', 'rate'],
   components: {
-    CurrencyInput
+    CurrencyInput,
+    CurrencyLabel
   },
 
   data () {
@@ -67,3 +74,23 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.conversion-calculator {
+  &__input {
+    &--left {
+      .el-input__inner {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        border-bottom: 0;
+      }
+    }
+    &--right {
+      .el-input__inner {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+      }
+    }
+  }
+}
+</style>

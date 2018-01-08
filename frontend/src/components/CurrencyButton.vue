@@ -49,7 +49,7 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 10px 15px;
+  padding: 5px 10px;
   border-radius: 4px;
   border: 1px solid #ECF5FD;
   margin: 5px 10px;
@@ -58,12 +58,12 @@ export default {
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 
   &__icon {
-    width: 48px;
-    height: 48px;
+    width: 38px;
+    height: 38px;
     margin-bottom: 10px;
   }
   &__name {
-    font-size: 1.2em;
+    font-size: 1.1em;
     font-weight: bold;
   }
 

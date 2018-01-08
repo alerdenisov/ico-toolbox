@@ -26,10 +26,6 @@ ru:
 import { mapState } from 'vuex'
 import { ACTION_TYPES } from '@/constants'
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 export default {
   name: 'sale-info',
   dependencies: ['$api'],

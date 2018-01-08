@@ -5,160 +5,139 @@ en:
 </i18n>
 
 <template lang="pug">
-  el-row(:gutter='20' :class="b()")
-    el-col(:span='24')
-      el-card(style='margin-bottom: 20px')
-        sale-info
-    el-col(:span='8')
-      el-card
-        h2 Sale Info
+  div(:class="b()")
+    el-card(:class="b('box', 'dashboard-box--deadline')")
+      span(:class="b('box-title')") Round ends
+      countdown(:class="b('deadline-countdown')" :expireAt='expireAt')
 
-        table
-          tr
-            td
-              h4 Deadline
-            td
-              p 10.02.2018
-          tr
-            td
-              h4 Hard cap
-            td
-              p 10,000,000.00 ETM (200 BTC)
-          tr
-            td(colspan='2')
-              h4 Prices
-          tr(v-for='currency in currencies')
-            td
-              h4 1 {{ currency }}
-            td
-              vue-numeric(
-                currency='ETM' 
-                currency-symbol-position='suffix' 
-                separator=','
-                :value='coinRate(currency)' 
-                :precision='4' 
-                :disabled='true')
-        
-        el-progress(:text-inside="true" :stroke-width="18" :percentage="2" status="exception")
-        
+    el-card(:class="b('box', 'dashboard-box--deadline')")
+      span(:class="b('box-title')") Token sold
+      div(:class="b('box-content')") 
+        currency-label(
+          ticker="ETM"
+          :value="5433462"
+          :precision="2")
+      div(:class="b('box-help')") 
+        span Remaining 
+        currency-label(
+            ticker="ETM"
+            :value="5433462"
+            :precision="2")
 
-      //- el-table(:data='saleInfo', style='width: 100%')
-      //-   el-table-column(prop='date', label='Date', width='180')
-      //-   el-table-column(prop='name', label='Name', width='180')
-      //-   el-table-column(prop='address', label='Address')
-      
-    el-col(:span='16')
-      el-card
-        h2 Select contribution currency
-        div(style='display: flex; flex-wrap: wrap')
-          currency-button(v-for='currency in currencies' :key='currency' :ticker='currency' @click='activeCurrency = currency' :selected='activeCurrency === currency')
 
-        //- el-button(v-for='currency in currencies' :key='currency') 
-        //-   img(:src='coinData(currency).icon')
-        //-   span {{ coinData(currency).name }}
-        //- el-tabs(v-model='activeCurrency')        
-          el-tab-pane(v-for='currency in currencies' :key='currency' :label='coinName(currency)', :name='currency') 
-            //- p {{ $t('excange-title', [currency]) }}
-      el-card(v-if='currencySelected')
-        h2 How much ETM do you need?
-        conversion-calculator(
-          :leftCurrency='activeCurrency'
-          rightCurrency='ETM'
-          :rate='coinRate(activeCurrency)'
-        )
-      el-card(v-if='currencySelected')
-        h4 Send your {{ activeCurrency }} to address:
-        deposit-wallet(:ticker='activeCurrency')
+    el-card(:class="b('box', 'dashboard-box--deadline')")
+      span(:class="b('box-title')") Raised
+      div(:class="b('box-content')") 
+        currency-label(
+          ticker="BTC"
+          :value="54.351235"
+          :precision="4")
+      div(:class="b('box-help')") 
+        span From 14 backers 
 
-      el-card(style='margin-top: 20px')
-        h2 Transactions
-        
-        el-tabs(v-model='activeCurrency')        
-          el-tab-pane(label='Your', name='your')
-            transaction-table(:transactions='myTransactions')
-          el-tab-pane(label='100 latest', name='latest')
-            transaction-table(:transactions='transactions')
+    el-button(type="primary") Contribute Now
 </template>
 
 <script>
 import { mapState } from 'vuex'
-
-import VueNumeric from 'vue-numeric'
-import ConversionCalculator from '@/components/ConversionCalculator'
-import DepositWallet from '@/components/DepositWallet'
-import CurrencyButton from '@/components/CurrencyButton'
-import TransactionTable from '@/components/TransactionTable'
-import SaleInfo from '@/components/SaleInfo'
-
+import { ACTION_TYPES } from '@/constants'
+import Countdown from '@/components/Countdown'
+import CurrencyLabel from '@/components/CurrencyLabel'
 export default {
   name: 'dashboard',
   dependencies: ['$api'],
-
   components: {
-    'conversion-calculator': ConversionCalculator,
-    DepositWallet,
-    TransactionTable,
-    CurrencyButton,
-    SaleInfo,
-    VueNumeric
+    CurrencyLabel,
+    Countdown
   },
-
-  data () {
-    return {
-      wallet: null,
-      activeCurrency: null,
-      receiveAmount: 0,
-      sendAmount: 0
-    }
-  },
-
   computed: {
-    currencies () {
-      return Object.keys(this.coins)
+    endTime () {
+      return new Date(this.saleInfo.endTime)
     },
-    currencySelected () {
-      return !!this.coins && !!this.coins[this.activeCurrency]
+    expireAt () {
+      return Math.trunc(this.endTime.getTime() / 1000)
     },
-    ...mapState(['session', 'profile', 'coins'])
+    ...mapState([
+      'saleInfo',
+      'saleProgress'
+    ])
   },
 
-  asyncComputed: {
-    async rates () {
-      return (await this.$api.rates(this.session)).data
-    },
-
-    async transactions () {
-      return (await this.$api.transactions(this.session)).data
-    },
-
-    async myTransactions () {
-      return (await this.$api.myTransactions(this.session)).data
-    }
+  mounted () {
+    this.updateState()
   },
 
   methods: {
-    coinData (currency) {
-      if (currency !== 'ETM') {
-        return {
-          ticker: currency,
-          name: this.$store.state.coins[currency].name,
-          icon: `https://www.coinpayments.net/images/coins/${currency}.png`
-        }
-      } else {
-        return {
-          ticker: currency,
-          name: 'Musereum',
-          icon: 'https://www.coinpayments.net/images/coins/ETH.png'
-        }
-      }
-    },
-    coinRate (currency) {
-      return 50000 * parseFloat(this.coins[currency].rate_btc)
+    async updateState () {
+      this.loading = true
+      const info = (await this.$api.info()).data
+      const progress = (await this.$api.progress()).data
+
+      await this.$store.dispatch(ACTION_TYPES.SaleInfo, info)
+      await this.$store.dispatch(ACTION_TYPES.SaleProgress, progress)
+
+      this.loading = false
     }
   }
 }
 </script>
+
 <style lang="scss">
 .dashboard {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  &__box-help,
+  &__box-title {
+    display: block;
+    text-align: center;
+    color: #8EABC4;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  &__box {
+    max-width: 400px;
+    width: 100%;
+    margin-bottom: 30px; 
+  }
+
+  &__box-content {
+    font-size: 150%;
+    font-weight: bold;
+    margin: 10px;
+    text-align: center;
+  }
+
+  &__deadline-countdown {
+    display: flex;
+    justify-content: center;
+
+    .countdown__part {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      margin: 0 20px;
+
+      &-value {
+        font-size: 150%;
+        font-weight: bold;
+        margin: 10px;
+      }
+
+      &-help {
+        text-align: center;
+        color: #8EABC4;
+        text-transform: uppercase;
+        font-size: 12px;
+        font-weight: bold;
+      }
+    }
+  }
 }
 </style>
