@@ -37,6 +37,8 @@ module.exports = async function (fastify, opts) {
     },
     data: opts
   })
+
+  fastify.register(require('fastify-formbody'))
   
   fastify.register(async function (fastify, opts) {
     fastify.register(require('../../lib/fastify-coinpayments'), {
@@ -96,6 +98,8 @@ async function registerRoutes (fastify, opts) {
   // })
   const { COINPAYMENTS_PRIVATE_KEY, COINPAYMENTS_PUBLIC_KEY } = fastify.config
 
+  fastify.use(require('../../lib/debug-response')('payments'))
+
   fastify.get('/wallet/:currency', async (req, reply) => {
     return fastify.paymentsService.getWallet(req.params.currency, req, reply)
   })
@@ -112,11 +116,28 @@ async function registerRoutes (fastify, opts) {
     return fastify.paymentsService.getTransactions(req, reply)
   })
 
+  fastify.get('/testtx', async (req, reply) => {
+    return new Promise((resolve, reject) => {
+      fastify.coinPayments.api.getTxList((err, result) => {
+        if (err) {
+          console.log(err)
+          return reject(err)
+        }
+        console.log(result)
+        return resolve(result)
+      })
+    })
+  })
+
   fastify.get('/rates', async (req, reply) => {
     return fastify.paymentsService.getRates(req, reply)
   })
 
   fastify.post('/ipn', async function (req, reply) {
+    console.log('------------------------------ipn--------------------------------------')
+    console.log(req.headers)
+    console.log(req.body)
+    console.log('------------------------------ipn--------------------------------------')
     if ( !COINPAYMENTS_PRIVATE_KEY || !COINPAYMENTS_PUBLIC_KEY ) {
       throw 'Merchant ID and Merchant Secret are needed'
     }

@@ -76,6 +76,9 @@ module.exports = async function (fastify, opts) {
 }
 
 async function registerRoutes (fastify, opts) {
+  
+  fastify.use(require('../../lib/debug-response')('sale'))
+
   fastify.post('/notifyTransaction', async (req, reply) => {
     const hmac = makeSignature(req.body, fastify.config.SALE_SERVICE_SECRET)
     

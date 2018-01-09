@@ -70,6 +70,8 @@ module.exports = async function (fastify, opts) {
 }
 
 async function registerRoutes (fastify, opts) {
+  fastify.use(require('../../lib/debug-response')('user'))
+
   fastify.get('/login', async (req, reply) => {
     const token = req.headers.authorization
     const profile = await fastify.auth0.profile(req.headers.authorization)
