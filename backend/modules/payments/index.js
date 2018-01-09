@@ -18,6 +18,7 @@ module.exports = async function (fastify, opts) {
         'USER_SERVICE_URL',
         'SALE_SERVICE_URL',
         'SALE_SERVICE_SECRET',
+        'COINPAYMENTS_MERCHANT_ID',
         'COINPAYMENTS_PRIVATE_KEY',
         'COINPAYMENTS_PUBLIC_KEY',
         'COINPAYMENTS_IPN', 
@@ -29,6 +30,7 @@ module.exports = async function (fastify, opts) {
         USER_SERVICE_URL: { type: 'string' },
         SALE_SERVICE_URL: { type: 'string' },
         SALE_SERVICE_SECRET: { type: 'string' },
+        COINPAYMENTS_MERCHANT_ID: { type: 'string' },
         COINPAYMENTS_PRIVATE_KEY: { type: 'string' },
         COINPAYMENTS_PUBLIC_KEY: { type: 'string' },
         COINPAYMENTS_IPN: { type: 'boolean' },
@@ -96,7 +98,7 @@ async function registerRoutes (fastify, opts) {
   //   await fastify.userService.updateProfile(profile)
   //   return await fastify.userService.getProfile(profile.sub)
   // })
-  const { COINPAYMENTS_PRIVATE_KEY, COINPAYMENTS_PUBLIC_KEY } = fastify.config
+  const { COINPAYMENTS_PRIVATE_KEY, COINPAYMENTS_PUBLIC_KEY, COINPAYMENTS_MERCHANT_ID } = fastify.config
 
   fastify.use(require('../../lib/debug-response')('payments'))
 
@@ -138,7 +140,7 @@ async function registerRoutes (fastify, opts) {
     console.log(req.headers)
     console.log(req.body)
     console.log('------------------------------ipn--------------------------------------')
-    if ( !COINPAYMENTS_PRIVATE_KEY || !COINPAYMENTS_PUBLIC_KEY ) {
+    if ( !COINPAYMENTS_PRIVATE_KEY || !COINPAYMENTS_MERCHANT_ID ) {
       throw 'Merchant ID and Merchant Secret are needed'
     }
 
@@ -148,7 +150,7 @@ async function registerRoutes (fastify, opts) {
       return signature
     }
 
-    if (!req.headers.hmac || !req.body || !req.body.ipn_mode || req.body.ipn_mode != 'hmac' || COINPAYMENTS_PUBLIC_KEY != req.body.merchant) {
+    if (!req.headers.hmac || !req.body || !req.body.ipn_mode || req.body.ipn_mode != 'hmac' || COINPAYMENTS_MERCHANT_ID != req.body.merchant) {
       return boom.badRequest(JSON.stringify({
         message: 'Coinpayments Invalid Request',
         hmac: !req.headers.hmac,
