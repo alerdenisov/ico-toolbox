@@ -32,6 +32,7 @@ services:
     env_file: .env
     links:
       - mongo
+      - redis
     depends_on:
       mongo:
         condition: service_healthy
@@ -44,6 +45,20 @@ services:
     env_file: .env
     links:
       - mongo
+      - redis
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: on-failure
+  sale:
+    image: ico-toolbox/sale
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile.sale
+    env_file: .env
+    links:
+      - mongo
+      - redis
     depends_on:
       mongo:
         condition: service_healthy
