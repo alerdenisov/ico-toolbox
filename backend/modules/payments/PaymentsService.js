@@ -111,10 +111,10 @@ class PaymentsService {
   }
 
   async transactionEvent(event, req, reply) {
-    const { statusRaw, txn_id, address, amountRaw, currency } = event
-    const status = parseInt(statusRaw)
-    const amount = parseFloat(amountRaw)
-    
+    let { status, txn_id, address, amount, currency } = event
+    const status = parseInt(status)
+    const amount = parseFloat(amount)
+
     const isFailed = status < 0
     const isPending = !isFailed && status < 100
     const isComplete = status === 100
