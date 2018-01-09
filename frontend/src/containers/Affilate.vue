@@ -9,45 +9,67 @@ ru:
 </i18n>
 
 <template lang="pug">
-  div(:class='b(mods)')
-    h1(:class='b("title", mods)') {{ $t('title') }}
-    p(:class='b("subtitle", mods)') {{ $t('subtitle', ['0.0.1']) }}
-    p(:class='b("disclaimer", mods)') {{ $t('disclaimer') }}
+  div(:class='b()' ref='container')
+    el-card(:class="b('card')")
+      //- el-tabs(v-model='showType')
+        el-tab-pane(label='Your', name='your')
+      affilated-table(:users='affilated' ref='table' :maxHeight='maxHeight')
 </template>
 
 <script>
+import AffilatedTable from '@/components/AffilatedTable'
 export default {
-  name: 'contribute'
+  name: 'affilated',
+  components: {
+    AffilatedTable
+  },
+  computed: {
+    affilated () {
+      return [
+        { _id: 11111111111112222222221, name: 'hello_world' },
+        { _id: 11111111111112222222222, name: 'hello_world' },
+        { _id: 11111111111112222222223, name: 'hello_world' },
+        { _id: 11111111111112222222224, name: 'hello_world' },
+        { _id: 11111111111112222222225, name: 'hello_world' },
+        { _id: 11111111111112222222226, name: 'hello_world' },
+        { _id: 11111111111112222222227, name: 'hello_world' },
+        { _id: 11111111111112222222228, name: 'hello_world' },
+        { _id: 11111111111112222222229, name: 'hello_world' },
+        { _id: 11111111111112222222221, name: 'hello_world' },
+        { _id: 11111111111112222222221, name: 'hello_world' },
+        { _id: 11111111111112222222221, name: 'hello_world' },
+        { _id: 11111111111112222222221, name: 'hello_world' },
+        { _id: 11111111111112222222221, name: 'hello_world' },
+        { _id: 11111111111112222222221, name: 'hello_world' }
+      ]
+    }
+  },
+  data () {
+    return {
+      maxHeight: 0
+    }
+  },
+  mounted () {
+    this.resizeTable()
+    window.addEventListener('resize', () => this.resizeTable())
+  },
+  methods: {
+    resizeTable () {
+      const el = this.$refs.table.$el
+      const top = el.getBoundingClientRect().top
+      const windowHeight = window.innerHeight
+      this.maxHeight = windowHeight - top - 45
+    }
+  }
 }
 </script>
 
 <style lang="scss">
-.welcome {
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-
-  &__title {
-    text-align: center;
-    font-size: 56px;
-    margin-bottom: 0.2em;
-    color: #6B809C;
-    margin-top: auto;
-  }
-
-  &__subtitle {
-    text-align: center;
-    margin-bottom: 30px;
-    color: #8EABC4;
-    text-transform: uppercase;
-    font-size: 12px;
-    font-weight: bold;
-  }
-
-  &__disclaimer {
-    margin-top: auto;
-  }
+.affilated {
+  // flex-grow: 1;
+  // display: flex;
+  // align-items: center;
+  // justify-content: center;
+  // flex-direction: column;
 }
 </style>

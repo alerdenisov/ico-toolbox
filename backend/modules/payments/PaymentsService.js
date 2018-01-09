@@ -18,7 +18,6 @@ function stringToOjectId (str) {
 
   var hash = sha256.create();
   hash.update(str);
-  console.log(hash.digest().toHex().substr(0, 24))
   return new ObjectId(hash.digest().toHex().substr(0, 24));
 }
 
@@ -55,13 +54,19 @@ class PaymentsService {
 
   async getWallet(currency, req, reply) {
     const user = await this.userClient.getUser(req)
+    if (!user) {
+      return Boom.badRequest('Authenticated data not provided')
+    }
     return await execRedis(this.redis, 'get', [`payments:${user._id}:${currency}`])
   }
 
   async createWallet(currency, req, reply) {
     const user = await this.userClient.getUser(req)
-    const rates = await this.getRates(req, reply)
+    if (!user) {
+      return Boom.badRequest('Authenticated data not provided')
+    }
 
+    const rates = await this.getRates(req, reply)
     if (!rates[currency] || rates[currency].status !== 'online' || rates[currency].accepted !== 1) {
       return Boom.badRequest('Target currency isn\'t accepting')
     }
@@ -98,7 +103,6 @@ class PaymentsService {
   async getUserTransactions(req, reply) {
     const user = await this.userClient.getUser(req)
     const userTxs = await this.paymentsCollection.find({ userId: ObjectId.createFromHexString(user._id) }).toArray()
-    console.log(userTxs)
     return userTxs
   }
 
@@ -154,7 +158,7 @@ class PaymentsService {
     await execRedis(this.redis, 'set', [`payments:transaction:${txn_id}`, JSON.stringify(transaction)])
 
     transaction.userId = transaction.userId.toString()
-    await this.saleClient.notifyTransaction(transaction)
+    this.saleClient.notifyTransaction(transaction)
     return transaction
   }
 }

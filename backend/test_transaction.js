@@ -7,7 +7,7 @@ const currency = config[0]
 const address = config[1]
 const amount = parseFloat(config[2])
 const amounti = Math.floor(amount * 1e8)
-const status = parseInt(config[3])
+const status = config[3] === 'error' ? -2 : parseInt(config[3])
 const fee = status >= 100 ? amount * 0.005 : 0
 const feei = Math.floor(fee * 1e8)
 

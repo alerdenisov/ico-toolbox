@@ -1,6 +1,7 @@
 export const ACTION_TYPES = {
   Authentication: 'AUTH_SET_SESSION',
   ReceiveProfile: 'AUTH_RECEIVE_PROFILE',
+  Logout: 'AUTH_LOGOUT',
 
   ReceiveCoins: 'PAYMENTS_RECEIVE_COINS',
 

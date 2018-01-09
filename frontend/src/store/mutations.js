@@ -7,6 +7,10 @@ export default {
   [MUTATION_TYPES.ReceiveProfile] (state, profile) {
     state.profile = profile
   },
+  [MUTATION_TYPES.Logout] (state) {
+    state.session = null
+    state.profile = null
+  },
   [MUTATION_TYPES.ReceiveCoins] (state, coins) {
     state.coins = coins
     state.coinsUpdate = Math.floor(new Date().getTime() / 1000)

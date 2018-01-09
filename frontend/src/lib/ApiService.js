@@ -29,6 +29,10 @@ export default class ApiService {
     return this._call(session, '/user/me', 'GET')
   }
 
+  getBalance (session, type) {
+    return this._call(session, `/sale/balance/${type}`, 'GET')
+  }
+
   getWallet (session, currency) {
     return this._call(session, `/payments/wallet/${currency}`, 'GET')
   }

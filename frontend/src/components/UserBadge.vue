@@ -5,31 +5,43 @@
     div(:class="b('content')")
       p(:class="b('nickname')") {{ nickname }}
       p(:class="b('balance')") 
-        span(:class="b('balance-amount')") 0
-        span(:class="b('balance-ticker')") ETM
+        currency-label(
+          ticker="ETM"
+          :value='balance'
+          :precision='2'
+        )
+        //- span(:class="b('balance-amount')") 0
+        //- span(:class="b('balance-ticker')") ETM
+    div(:class="b('logout')")
+      el-button(@click='logout' :class="b('logout-button')")
+        i.el-icon-circle-close-outline
     //- pre {{ saleProgress }}
     //- pre {{ saleInfo }}
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import CurrencyLabel from '@/components/CurrencyLabel'
+import { ACTION_TYPES } from '@/constants'
 
 export default {
   name: 'user-badge',
-  data () {
-    return {
-    }
+  props: ['profile', 'balance'],
+  components: {
+    CurrencyLabel
   },
   computed: {
     userpic () {
-      return this.profile.picture
+      return this.profile ? this.profile.picture : null
     },
     nickname () {
-      return this.profile.nickname
-    },
-    ...mapState([
-      'profile'
-    ])
+      return this.profile ? this.profile.nickname : null
+    }
+  },
+  methods: {
+    logout () {
+      this.$store.dispatch(ACTION_TYPES.Logout)
+      this.$router.push('/')
+    }
   }
 }
 </script>

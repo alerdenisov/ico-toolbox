@@ -6,7 +6,6 @@ const Boom = require('boom')
 
 function makeSignature(parameters, secret) {
   const paramString = qs.stringify(parameters).replace(/%20/g, '+')
-  console.log('check sig for', paramString, secret)
   const signature = crypto.createHmac('sha512', secret).update(paramString).digest('hex')
   return signature
 }
@@ -43,6 +42,26 @@ module.exports = async function (fastify, opts) {
     fastify.register(require('fastify-mongodb'), {
       url: fastify.config.SALE_MONGO_URL
     })
+    
+    fastify.register(require('fastify-redis'), {
+      url: fastify.config.SALE_REDIS_URL
+    })
+
+    // Create our business login object and store it in fastify instance
+    // Because we need `paymentsCollection` *after* (and not only in) this plugin,
+    // we need to use `fastify-plugin` to ask to `fastify` don't encapsulate `decorateWithpaymentsCollection`
+    // but to share the same fastify instance between inside and outside.
+    // In this way all decorations are available outside too.
+    fastify.register(fp(async function decorateWithCollections (fastify, opts) {
+      fastify.decorate('saleCollection', fastify.mongo.db.collection('sale'))
+      fastify.decorate('affilatedCollection', fastify.mongo.db.collection('affilated'))
+    }))
+
+    // Each plugin is standalone, so the database shoud be set up
+    // Mongodb has no schema but we need to specify some indexes and validators
+    fastify.register(async function (fastify, opts) {
+      require('./mongoCollectionSetup')(fastify.mongo.db, fastify.affilatedCollection, fastify.saleCollection)
+    })
 
     fastify.register(require('../../clients/user'), fastify.config)
 
@@ -53,7 +72,7 @@ module.exports = async function (fastify, opts) {
     }))
 
     fastify.register(registerRoutes)
-  })
+  }) 
 }
 
 async function registerRoutes (fastify, opts) {
@@ -64,7 +83,7 @@ async function registerRoutes (fastify, opts) {
       return Boom.forbidden('Incorrect message signature')
     }
 
-    // TODO: ship tokens
+    return await fastify.saleService.shipTokens(req.body, req, reply)
   })
 
   fastify.get('/info', async (req, reply) => {
@@ -73,5 +92,17 @@ async function registerRoutes (fastify, opts) {
 
   fastify.get('/progress', async (req, reply) => {
     return await fastify.saleService.getProgress(req, reply)
+  })
+
+  fastify.get('/affilated', async (req, reply) => {
+    return await fastify.saleService.getAffilated(req, reply)
+  })
+
+  fastify.get('/inviteCode', async (req, reply) => {
+    return await fastify.saleService.getInviteCode(req, reply)
+  })
+
+  fastify.get('/balance/:type', async (req, reply) => {
+    return await fastify.saleService.getBalance(req.params.type, req, reply)
   })
 }

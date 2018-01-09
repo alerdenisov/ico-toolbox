@@ -3,11 +3,11 @@ en:
   NotSigned: You should to authenticate first
 </i18n>
 <template lang="pug">
-  el-container(:class='b()' v-loading='loading')
+  div(:class='b()' v-loading='loading' v-if='session && profile')
     el-header(:class='b("header-wrapper")')
     el-container(:class='b("screen-wrapper")')
       el-aside(:class='b("sidebar")')
-        user-badge
+        user-badge(:profile='profile' :balance='balance')
         el-menu(
           :class='b("menu")'
           :router='true'
@@ -17,6 +17,10 @@ en:
           el-menu-item(index='affilate' route='/affilate') Affilate
           el-menu-item(index='transactions' route='/transactions') Transactions
       el-main(:class='b("screen")')
+        div(:class='b("content")')
+          router-view(:class='b("view")')
+  div(:class='b()' v-else)
+    el-main(:class='b("screen")')
         div(:class='b("content")')
           router-view(:class='b("view")')
 </template>
@@ -33,6 +37,16 @@ export default {
 
   components: {
     UserBadge
+  },
+
+  asyncComputed: {
+    async balance () {
+      if (this.session && this.profile) {
+        return (await this.$api.getBalance(this.session, 'all')).data
+      } else {
+        return 0
+      }
+    }
   },
 
   data () {
@@ -96,6 +110,10 @@ export default {
 <style lang="scss">
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,700&amp;subset=cyrillic);
 
+html, body {
+  overflow: hidden;
+}
+
 .auth0-lock.auth0-lock,
 body {
   font-family: "Roboto" !important; //"Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
@@ -126,6 +144,9 @@ h1, h2, h3, h4, h5, h6, p {
 }
 
 .app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   // position: fixed;
   // left: 0;
   // right: 0;

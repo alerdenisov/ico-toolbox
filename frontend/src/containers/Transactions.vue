@@ -3,9 +3,9 @@
     el-card(:class="b('card')")
       el-tabs(v-model='showType')
         el-tab-pane(label='Your', name='your')
-          transaction-table(:transactions='myTransactions')
+          transaction-table(:transactions='myTransactions' ref='table' :maxHeight='maxHeight')
         el-tab-pane(label='100 latest' name='latest')
-          transaction-table(:transactions='transactions')
+          transaction-table(:transactions='transactions' :maxHeight='maxHeight')
 
 </template>
 
@@ -21,7 +21,8 @@ export default {
   },
   data () {
     return {
-      showType: 'your'
+      showType: 'your',
+      maxHeight: 200
     }
   },
   computed: {
@@ -39,17 +40,15 @@ export default {
     }
   },
   mounted () {
-    this.resize()
+    setTimeout(() => this.resize(), 200)
     window.addEventListener('resize', () => this.resize())
   },
   methods: {
     resize () {
-      const el = this.$refs.container
-      const viewportOffset = el.getBoundingClientRect()
-      // these are relative to the viewport, i.e. the window
-      const top = viewportOffset.top
-      const left = viewportOffset.left
-      console.log(top, left, el)
+      const el = this.$refs.table.$el
+      const top = el.getBoundingClientRect().top
+      const windowHeight = window.innerHeight
+      this.maxHeight = windowHeight - top - 45
     }
   }
 }
