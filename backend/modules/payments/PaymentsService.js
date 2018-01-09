@@ -112,17 +112,18 @@ class PaymentsService {
 
   async transactionEvent(event, req, reply) {
     let { status, txn_id, address, amount, currency } = event
-    const status = parseInt(status)
-    const amount = parseFloat(amount)
+    status = parseInt(status)
+    amount = parseFloat(amount)
 
     const isFailed = status < 0
     const isPending = !isFailed && status < 100
     const isComplete = status === 100
 
-    const userId = ObjectId.createFromHexString(await execRedis(this.redis, 'get', [`payments:wallets:${address}`]))
+    let userId = ObjectId.createFromHexString(await execRedis(this.redis, 'get', [`payments:wallets:${address}`]))
 
     if (!userId) {
-      // TODO: save log of unknown user transaction (how it could be possible?)
+      console.log('not found user')
+      userId = 'private user'
     }
 
     const walletData = await execRedis(this.redis, 'get', [`payments:${userId}:${currency}`])
