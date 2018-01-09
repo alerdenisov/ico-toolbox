@@ -1,44 +1,44 @@
-import auth0 from 'auth0-js'
-import { ACTION_TYPES } from '@/constants'
+import Auth0Lock from 'auth0-lock'
+import eventEmitter from 'event-emitter'
 
-let instance
-
-class AuthService {
+export default class AuthService {
   constructor () {
-    this.auth0 = new auth0.WebAuth({
-      domain: 'aofg.eu.auth0.com',
-      clientID: 'fSCBGh15rlKaKyhzkrfq1w2tROQibzrE',
-      redirectUri: window.location.origin + '/auth/callback',
-      audience: 'https://aofg.eu.auth0.com/userinfo',
-      responseType: 'token id_token',
-      scope: 'openid email profile'
+    this.auth0 = new Auth0Lock(
+      'fSCBGh15rlKaKyhzkrfq1w2tROQibzrE',
+      'aofg.eu.auth0.com',
+      {
+        auth: {
+          responseType: 'token id_token',
+          redirect: false,
+          redirectUrl: window.location.origin + '/auth/callback',
+          params: {
+            scope: 'openid profile name email picture'
+          }
+        }
+      }
+    )
+
+    this.auth0.on('authenticated', authResult => {
+      this.emit('authenticated', authResult)
     })
 
-    instance = instance || this
-    return instance
+    // this.auth0 = new auth0.WebAuth({
+    //   domain: 'aofg.eu.auth0.com',
+    //   clientID: 'fSCBGh15rlKaKyhzkrfq1w2tROQibzrE',
+    //   redirectUri: window.location.origin + '/auth/callback',
+    //   audience: 'https://aofg.eu.auth0.com/userinfo',
+    //   responseType: 'token id_token',
+    //   scope: 'openid email profile'
+    // })
+
+    eventEmitter(this)
   }
 
-  login () {
-    this.auth0.authorize()
+  show () {
+    this.auth0.show()
   }
 
-  callback (ctx) {
-    const { $router } = ctx
-    this.auth0.parseHash((err, authResult) => {
-      if (err) {
-        return console.log(err)
-      }
-      if (authResult && authResult.accessToken && authResult.idToken) {
-        this.setSession(ctx, authResult)
-        $router.push({ path: '/' })
-      }
-    })
-  }
-
-  setSession ({ $store }, session) {
-    $store.dispatch(ACTION_TYPES.Authentication, session)
+  hide () {
+    this.auth0.hide()
   }
 }
-
-instance = new AuthService()
-export default instance

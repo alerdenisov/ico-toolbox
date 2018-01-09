@@ -1,4 +1,14 @@
 const fp = require('fastify-plugin')
+const ws = require('../../lib/fastify-ws')
+const crypto = require('crypto')
+const qs = require('querystring')
+const Boom = require('boom')
+
+function makeSignature(parameters, secret) {
+  const paramString = qs.stringify(parameters).replace(/%20/g, '+')
+  const signature = crypto.createHmac('sha512', secret).update(paramString).digest('hex')
+  return signature
+}
 
 module.exports = async function (fastify, opts) {
   // This is a plugin registration inside a plugin
@@ -9,67 +19,90 @@ module.exports = async function (fastify, opts) {
       type: 'object',
       required: [ 
         'SALE_MONGO_URL',
+        'SALE_REDIS_URL',
+        'SALE_SERVICE_SECRET',
         'USER_SERVICE_URL',
         'PAYMENTS_SERVICE_URL'
       ],
       properties: {
-        USER_MONGO_URL: { type: 'string', default: 'mongodb://localhost/user' },
-        AUTH0_DOMAIN: { type: 'string' },
-        AUTH0_CLIENT_ID: { type: 'string' },
-        AUTH0_CLIENT_SECRET: { type: 'string' }
+        SALE_MONGO_URL: { type: 'string', default: 'mongodb://localhost/sale' },
+        SALE_REDIS_URL: { type: 'string', default: 'redis://127.0.0.1:6379' },
+        SALE_SERVICE_SECRET: { type: 'string', default: 'test' },
+        USER_SERVICE_URL: { type: 'string', default: 'http://localhost:3000/api/user' },
+        PAYMENTS_SERVICE_URL: { type: 'string', default: 'http://localhost:3000/api/payments' }
       }
     },
     data: opts
   })
 
-  // Auth0 plugin dependency
-  fastify.register(fp(async function (fastify) {
-    fastify.register(require('../../lib/fastify-auth0'), {
-      AUTH0_DOMAIN: fastify.config.AUTH0_DOMAIN,
-      AUTH0_CLIENT_ID: fastify.config.AUTH0_CLIENT_ID,
-      AUTH0_CLIENT_SECRET: fastify.config.AUTH0_CLIENT_SECRET
-    })
-  }))
-
-  fastify.register(async function (fastify, opts) {
+  fastify.register(async function (fastify) {
     // We need a connection database:
     // `fastify-mongodb` makes this connection and store the database instance into `fastify.mongo.db`
     // See https://github.com/fastify/fastify-mongodb
-    await fastify.register(require('fastify-mongodb'), {
-      url: fastify.config.USER_MONGO_URL
+    fastify.register(require('fastify-mongodb'), {
+      url: fastify.config.SALE_MONGO_URL
+    })
+    
+    fastify.register(require('fastify-redis'), {
+      url: fastify.config.SALE_REDIS_URL
     })
 
     // Create our business login object and store it in fastify instance
-    // Because we need `userCollection` *after* (and not only in) this plugin,
-    // we need to use `fastify-plugin` to ask to `fastify` don't encapsulate `decorateWithUserCollection`
+    // Because we need `paymentsCollection` *after* (and not only in) this plugin,
+    // we need to use `fastify-plugin` to ask to `fastify` don't encapsulate `decorateWithpaymentsCollection`
     // but to share the same fastify instance between inside and outside.
     // In this way all decorations are available outside too.
-    await fastify.register(fp(async function decorateWithUserCollection (fastify, opts) {
-      fastify.decorate('userCollection', fastify.mongo.db.collection('users'))
+    fastify.register(fp(async function decorateWithCollections (fastify, opts) {
+      fastify.decorate('saleCollection', fastify.mongo.db.collection('sale'))
+      fastify.decorate('affilatedCollection', fastify.mongo.db.collection('affilated'))
     }))
 
     // Each plugin is standalone, so the database shoud be set up
     // Mongodb has no schema but we need to specify some indexes and validators
-    await fastify.register(async function (fastify, opts) {
-      require('./mongoCollectionSetup')(fastify.mongo.db, fastify.userCollection)
+    fastify.register(async function (fastify, opts) {
+      require('./mongoCollectionSetup')(fastify.mongo.db, fastify.affilatedCollection, fastify.saleCollection)
     })
 
-    // Add another business logic object to `fastify` instance
-    // Again, `fastify-plugin` is used in order to access to `fastify.userService` from outside
-    await fastify.register(fp(async function (fastify, opts) {
-      const UserService = require('./UserService.js')
-      const userService = new UserService(fastify)
-      fastify.decorate('userService', userService)
+    fastify.register(require('../../clients/user'), fastify.config)
+
+    fastify.register(fp(async function (fastify, opts) {
+      const SaleService = require('./SaleService.js')
+      const saleService = new SaleService(fastify)
+      fastify.decorate('saleService', saleService)
     }))
 
     fastify.register(registerRoutes)
-  })
+  }) 
 }
 
 async function registerRoutes (fastify, opts) {
-  fastify.get('/me', async (req, reply) => {
-    const profile = await fastify.auth0.profile(req.headers.authorization)
-    await fastify.userService.updateProfile(profile)
-    return await fastify.userService.getProfile(profile.sub)
+  fastify.post('/notifyTransaction', async (req, reply) => {
+    const hmac = makeSignature(req.body, fastify.config.SALE_SERVICE_SECRET)
+    
+    if (hmac !== req.headers.hmac) {
+      return Boom.forbidden('Incorrect message signature')
+    }
+
+    return await fastify.saleService.shipTokens(req.body, req, reply)
+  })
+
+  fastify.get('/info', async (req, reply) => {
+    return await fastify.saleService.getInfo(req, reply)
+  })
+
+  fastify.get('/progress', async (req, reply) => {
+    return await fastify.saleService.getProgress(req, reply)
+  })
+
+  fastify.get('/affilated', async (req, reply) => {
+    return await fastify.saleService.getAffilated(req, reply)
+  })
+
+  fastify.get('/inviteCode', async (req, reply) => {
+    return await fastify.saleService.getInviteCode(req, reply)
+  })
+
+  fastify.get('/balance/:type', async (req, reply) => {
+    return await fastify.saleService.getBalance(req.params.type, req, reply)
   })
 }

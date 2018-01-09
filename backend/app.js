@@ -34,16 +34,6 @@ module.exports = async function (fastify, opts) {
     })
     .register(require('./modules/user'), { prefix: '/api/user' })
     .register(require('./modules/payments'), { prefix: '/api/payments'})
-    // .register(async function (fastify, opts) {
-    //   fastify.post('/ipn', async (req, reply) => {
-    //     return {
-    //       foo: 'bar'
-    //     }
-    //   })
-    // }, { prefix: '/api/payments'})
+    .register(require('./modules/sale'), { prefix: '/api/sale'})
     .register(require('fastify-swagger'), swaggerOption)
-    .register(require('fastify-static'), {
-      root: path.join(__dirname, '..', 'frontend', 'dist'),
-      prefix: '/'
-    })
 }

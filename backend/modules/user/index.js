@@ -9,12 +9,14 @@ module.exports = async function (fastify, opts) {
       type: 'object',
       required: [ 
         'USER_MONGO_URL',
+        'USER_REDIS_URL',
         'AUTH0_DOMAIN',
         'AUTH0_CLIENT_ID',
         'AUTH0_CLIENT_SECRET'
       ],
       properties: {
         USER_MONGO_URL: { type: 'string', default: 'mongodb://localhost/user' },
+        USER_REDIS_URL: { type: 'string', default: 'redis://127.0.0.1:6379' },
         AUTH0_DOMAIN: { type: 'string' },
         AUTH0_CLIENT_ID: { type: 'string' },
         AUTH0_CLIENT_SECRET: { type: 'string' }
@@ -34,6 +36,10 @@ module.exports = async function (fastify, opts) {
     // See https://github.com/fastify/fastify-mongodb
     fastify.register(require('fastify-mongodb'), {
       url: fastify.config.USER_MONGO_URL
+    })
+
+    fastify.register(require('fastify-redis'), {
+      url: fastify.config.USER_REDIS_URL
     })
 
     // Create our business login object and store it in fastify instance
@@ -64,9 +70,14 @@ module.exports = async function (fastify, opts) {
 }
 
 async function registerRoutes (fastify, opts) {
-  fastify.get('/me', async (req, reply) => {
+  fastify.get('/login', async (req, reply) => {
+    const token = req.headers.authorization
     const profile = await fastify.auth0.profile(req.headers.authorization)
-    await fastify.userService.updateProfile(profile)
-    return await fastify.userService.getProfile(profile.sub)
+    await fastify.userService.updateProfile(profile, token)
+    return await fastify.userService.getProfile(token)
+  })
+
+  fastify.get('/me', async (req, reply) => {
+    return await fastify.userService.getProfile(req.headers.authorization)
   })
 }
