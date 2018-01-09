@@ -25,11 +25,11 @@ module.exports = async function (fastify, opts) {
         'PAYMENTS_SERVICE_URL'
       ],
       properties: {
-        SALE_MONGO_URL: { type: 'string', default: 'mongodb://localhost/sale' },
-        SALE_REDIS_URL: { type: 'string', default: 'redis://127.0.0.1:6379' },
-        SALE_SERVICE_SECRET: { type: 'string', default: 'test' },
-        USER_SERVICE_URL: { type: 'string', default: 'http://localhost:3000/api/user' },
-        PAYMENTS_SERVICE_URL: { type: 'string', default: 'http://localhost:3000/api/payments' }
+        SALE_MONGO_URL: { type: 'string' },
+        SALE_REDIS_URL: { type: 'string' },
+        SALE_SERVICE_SECRET: { type: 'string' },
+        USER_SERVICE_URL: { type: 'string' },
+        PAYMENTS_SERVICE_URL: { type: 'string' }
       }
     },
     data: opts

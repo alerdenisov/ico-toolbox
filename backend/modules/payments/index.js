@@ -24,15 +24,15 @@ module.exports = async function (fastify, opts) {
         'COINPAYMENTS_IPN_TIME',
       ],
       properties: {
-        PAYMENTS_MONGO_URL: { type: 'string', default: 'mongodb://localhost/payments' },
-        PAYMENTS_REDIS_URL: { type: 'string', default: 'redis://127.0.0.1:6379' },
-        USER_SERVICE_URL: { type: 'string', default: 'http://localhost:3000/api/user' },
-        SALE_SERVICE_URL: { type: 'string', default: 'http://localhost:3000/api/sale' },
+        PAYMENTS_MONGO_URL: { type: 'string' },
+        PAYMENTS_REDIS_URL: { type: 'string' },
+        USER_SERVICE_URL: { type: 'string' },
+        SALE_SERVICE_URL: { type: 'string' },
         SALE_SERVICE_SECRET: { type: 'string' },
         COINPAYMENTS_PRIVATE_KEY: { type: 'string' },
         COINPAYMENTS_PUBLIC_KEY: { type: 'string' },
-        COINPAYMENTS_IPN: { type: 'boolean', default: false },
-        COINPAYMENTS_IPN_TIME: { type: 'integer', default: 20 }
+        COINPAYMENTS_IPN: { type: 'boolean' },
+        COINPAYMENTS_IPN_TIME: { type: 'integer' }
       }
     },
     data: opts
