@@ -6,9 +6,6 @@
           transaction-table(:transactions='myTransactions' ref='table' :maxHeight='maxHeight')
         el-tab-pane(label='100 latest' name='latest')
           transaction-table(:transactions='transactions' :maxHeight='maxHeight')
-
-      pre {{ test }}
-
 </template>
 
 <script>

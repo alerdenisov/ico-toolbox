@@ -10,10 +10,12 @@ ru:
 
 <template lang="pug">
   div(:class='b()' ref='container')
-    el-card(:class="b('card')")
+    h1 Affilated contributor list will be available soon as possible
+    //- el-card(:class="b('card')")
       //- el-tabs(v-model='showType')
         el-tab-pane(label='Your', name='your')
-      affilated-table(:users='affilated' ref='table' :maxHeight='maxHeight')
+      
+      //- affilated-table(:users='affilated' ref='table' :maxHeight='maxHeight')
 </template>
 
 <script>
@@ -66,10 +68,10 @@ export default {
 
 <style lang="scss">
 .affilated {
-  // flex-grow: 1;
-  // display: flex;
-  // align-items: center;
-  // justify-content: center;
-  // flex-direction: column;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 </style>

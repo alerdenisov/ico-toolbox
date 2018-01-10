@@ -80,6 +80,10 @@ import vueBemCn from 'vue-bem-cn'
 import AsyncComputed from 'vue-async-computed'
 import { ApiService, AuthService } from '@/lib/services'
 import injector from 'vue-inject'
+import 'vue-awesome/icons/sign-out'
+import 'vue-awesome/icons/refresh'
+import AwesomeIcon from 'vue-awesome/components/Icon'
+Vue.component('awesome-icon', AwesomeIcon)
 
 injector.service('$auth', AuthService)
 injector.service('$api', ApiService)

@@ -12,9 +12,8 @@
         )
         //- span(:class="b('balance-amount')") 0
         //- span(:class="b('balance-ticker')") ETM
-    div(:class="b('logout')")
-      el-button(@click='logout' :class="b('logout-button')")
-        i.el-icon-circle-close-outline
+    div(:class="b('logout')" @click='logout')
+      awesome-icon(name='sign-out' :class="b('logout-icon')")
     //- pre {{ saleProgress }}
     //- pre {{ saleInfo }}
 </template>
@@ -49,6 +48,7 @@ export default {
 <style lang="scss">
 .user-badge {
   display: flex;
+  align-items: center;
   padding: 20px;
 
   background-color: #2c404c;
@@ -84,6 +84,25 @@ export default {
 
     &-ticker {
       margin-left: 4px;
+    }
+  }
+
+  &__logout {
+    padding: 10px;
+    margin-left: auto;
+    opacity: 0.3;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
+      opacity: 1;
+      border-color: rgba(255,255,255,0.5);
+      box-shadow: 0 0 3px rgba(255,255,255,0.3);
     }
   }
 }
