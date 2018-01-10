@@ -16,7 +16,7 @@ const message = {
   ipn_type:	'deposit',
   ipn_mode: 'hmac',
   ipn_id: crypto.createHash('sha256').update(Math.random().toString()).digest('hex'),
-  merchant: process.env.COINPAYMENTS_PUBLIC_KEY,
+  merchant: process.env.COINPAYMENTS_MERCHANT_ID,
   txn_id: crypto.createHash('sha256').update(Math.random().toString()).digest('hex'),
   status_text: 'Test transaction',
   confirms: 0,
@@ -34,7 +34,7 @@ async function sendMessage (message) {
 
   function getPrivateHeadersIPN (parameters) {
     const paramString = qs.stringify(parameters).replace(/%20/g, '+')
-    const signature = crypto.createHmac('sha512', process.env.COINPAYMENTS_PRIVATE_KEY).update(paramString).digest('hex')
+    const signature = crypto.createHmac('sha512', process.env.COINPAYMENTS_IPN_SECRET).update(paramString).digest('hex')
     return signature
   }
   

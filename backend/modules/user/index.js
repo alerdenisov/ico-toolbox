@@ -15,8 +15,8 @@ module.exports = async function (fastify, opts) {
         'AUTH0_CLIENT_SECRET'
       ],
       properties: {
-        USER_MONGO_URL: { type: 'string', default: 'mongodb://localhost/user' },
-        USER_REDIS_URL: { type: 'string', default: 'redis://127.0.0.1:6379' },
+        USER_MONGO_URL: { type: 'string' },
+        USER_REDIS_URL: { type: 'string' },
         AUTH0_DOMAIN: { type: 'string' },
         AUTH0_CLIENT_ID: { type: 'string' },
         AUTH0_CLIENT_SECRET: { type: 'string' }
@@ -70,6 +70,8 @@ module.exports = async function (fastify, opts) {
 }
 
 async function registerRoutes (fastify, opts) {
+  fastify.use(require('../../lib/debug-response')('user'))
+
   fastify.get('/login', async (req, reply) => {
     const token = req.headers.authorization
     const profile = await fastify.auth0.profile(req.headers.authorization)

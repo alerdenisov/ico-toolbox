@@ -54,8 +54,9 @@ export default {
   border: 1px solid #ECF5FD;
   margin: 5px 10px;
   margin-left: 0 !important;
-
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+  cursor: pointer;
 
   &__icon {
     width: 38px;
@@ -74,6 +75,8 @@ export default {
   &--selected {
     border-color: #0079C4;
     box-shadow: 0 0 2px #0079C4;
+
+    cursor: default;
 
     &:hover {
       border-color: #0079C4;

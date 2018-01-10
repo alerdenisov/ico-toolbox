@@ -15,13 +15,13 @@ en:
       div(:class="b('box-content')") 
         currency-label(
           ticker="ETM"
-          :value="5433462"
+          :value='tokensAmount'
           :precision="2")
       div(:class="b('box-help')") 
         span Remaining 
         currency-label(
             ticker="ETM"
-            :value="5433462"
+            :value="leftEtm"
             :precision="2")
 
 
@@ -30,12 +30,17 @@ en:
       div(:class="b('box-content')") 
         currency-label(
           ticker="BTC"
-          :value="54.351235"
+          :value="btcAmount"
           :precision="4")
       div(:class="b('box-help')") 
-        span From 14 backers 
+        span From
+        | 
+        currency-label(
+          ticker="BTC"
+          :value="200"
+          :precision="0")
 
-    el-button(type="primary") Contribute Now
+    el-button(type="primary" @click='() => $router.push("/contribute")' href='/contribute') Contribute Now
 </template>
 
 <script>
@@ -57,6 +62,23 @@ export default {
     expireAt () {
       return Math.trunc(this.endTime.getTime() / 1000)
     },
+
+    tokensAmount () {
+      return this.saleProgress.tokensAmount
+    },
+
+    leftEtm () {
+      return (10 * 1e6) - this.tokensAmount
+    },
+
+    btcAmount () {
+      return this.saleProgress.btcAmount
+    },
+
+    leftBtc () {
+      return 200 - this.saleProgress.btcAmount
+    },
+
     ...mapState([
       'saleInfo',
       'saleProgress'

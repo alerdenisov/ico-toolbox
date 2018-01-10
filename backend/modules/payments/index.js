@@ -18,25 +18,31 @@ module.exports = async function (fastify, opts) {
         'USER_SERVICE_URL',
         'SALE_SERVICE_URL',
         'SALE_SERVICE_SECRET',
+        'COINPAYMENTS_MERCHANT_ID',
+        'COINPAYMENTS_IPN_SECRET',
         'COINPAYMENTS_PRIVATE_KEY',
         'COINPAYMENTS_PUBLIC_KEY',
         'COINPAYMENTS_IPN', 
         'COINPAYMENTS_IPN_TIME',
       ],
       properties: {
-        PAYMENTS_MONGO_URL: { type: 'string', default: 'mongodb://localhost/payments' },
-        PAYMENTS_REDIS_URL: { type: 'string', default: 'redis://127.0.0.1:6379' },
-        USER_SERVICE_URL: { type: 'string', default: 'http://localhost:3000/api/user' },
-        SALE_SERVICE_URL: { type: 'string', default: 'http://localhost:3000/api/sale' },
+        PAYMENTS_MONGO_URL: { type: 'string' },
+        PAYMENTS_REDIS_URL: { type: 'string' },
+        USER_SERVICE_URL: { type: 'string' },
+        SALE_SERVICE_URL: { type: 'string' },
         SALE_SERVICE_SECRET: { type: 'string' },
+        COINPAYMENTS_MERCHANT_ID: { type: 'string' },
+        COINPAYMENTS_IPN_SECRET: { type: 'string' },
         COINPAYMENTS_PRIVATE_KEY: { type: 'string' },
         COINPAYMENTS_PUBLIC_KEY: { type: 'string' },
-        COINPAYMENTS_IPN: { type: 'boolean', default: false },
-        COINPAYMENTS_IPN_TIME: { type: 'integer', default: 20 }
+        COINPAYMENTS_IPN: { type: 'boolean' },
+        COINPAYMENTS_IPN_TIME: { type: 'integer' }
       }
     },
     data: opts
   })
+
+  fastify.register(require('fastify-formbody'))
   
   fastify.register(async function (fastify, opts) {
     fastify.register(require('../../lib/fastify-coinpayments'), {
@@ -94,7 +100,9 @@ async function registerRoutes (fastify, opts) {
   //   await fastify.userService.updateProfile(profile)
   //   return await fastify.userService.getProfile(profile.sub)
   // })
-  const { COINPAYMENTS_PRIVATE_KEY, COINPAYMENTS_PUBLIC_KEY } = fastify.config
+  const { COINPAYMENTS_IPN_SECRET, COINPAYMENTS_MERCHANT_ID } = fastify.config
+
+  fastify.use(require('../../lib/debug-response')('payments'))
 
   fastify.get('/wallet/:currency', async (req, reply) => {
     return fastify.paymentsService.getWallet(req.params.currency, req, reply)
@@ -112,29 +120,46 @@ async function registerRoutes (fastify, opts) {
     return fastify.paymentsService.getTransactions(req, reply)
   })
 
+  fastify.get('/testtx', async (req, reply) => {
+    return new Promise((resolve, reject) => {
+      fastify.coinPayments.api.getTxList((err, result) => {
+        if (err) {
+          console.log(err)
+          return reject(err)
+        }
+        console.log(result)
+        return resolve(result)
+      })
+    })
+  })
+
   fastify.get('/rates', async (req, reply) => {
     return fastify.paymentsService.getRates(req, reply)
   })
 
   fastify.post('/ipn', async function (req, reply) {
-    if ( !COINPAYMENTS_PRIVATE_KEY || !COINPAYMENTS_PUBLIC_KEY ) {
+    console.log('------------------------------ipn--------------------------------------')
+    console.log(req.headers)
+    console.log(req.body)
+    console.log('------------------------------ipn--------------------------------------')
+    if ( !COINPAYMENTS_IPN_SECRET || !COINPAYMENTS_MERCHANT_ID ) {
       throw 'Merchant ID and Merchant Secret are needed'
     }
 
     const getPrivateHeadersIPN = function getPrivateHeadersIPN(parameters) {
       const paramString = qs.stringify(parameters).replace(/%20/g, '+')
-      const signature = crypto.createHmac('sha512', COINPAYMENTS_PRIVATE_KEY).update(paramString).digest('hex')
+      const signature = crypto.createHmac('sha512', COINPAYMENTS_IPN_SECRET).update(paramString).digest('hex')
       return signature
     }
 
-    if (!req.headers.hmac || !req.body || !req.body.ipn_mode || req.body.ipn_mode != 'hmac' || COINPAYMENTS_PUBLIC_KEY != req.body.merchant) {
+    if (!req.headers.hmac || !req.body || !req.body.ipn_mode || req.body.ipn_mode != 'hmac' || COINPAYMENTS_MERCHANT_ID != req.body.merchant) {
       return boom.badRequest(JSON.stringify({
         message: 'Coinpayments Invalid Request',
         hmac: !req.headers.hmac,
         body: !req.body,
         ipn_mode: !req.body.ipn_mode,
         right_mode: req.body.ipn_mode != 'hmac',
-        pubkey: COINPAYMENTS_PUBLIC_KEY != req.body.merchant
+        pubkey: COINPAYMENTS_MERCHANT_ID != req.body.merchant
       }))
     }
 
@@ -143,7 +168,11 @@ async function registerRoutes (fastify, opts) {
       return boom.badRequest(`Coinpayments Invalid Request`)
     }
 
-    reply.code(204).header('Content-Type', 'application/json').send()
-    await fastify.paymentsService.transactionEvent(req.body, req, reply)
+    try {
+      await fastify.paymentsService.transactionEvent(req.body, req, reply)
+      reply.code(204).header('Content-Type', 'application/json').send()
+    } catch (e) {
+      return boom.badRequest(e)
+    }
   })
 }

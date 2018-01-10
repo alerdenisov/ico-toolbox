@@ -111,7 +111,7 @@ export default {
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,700&amp;subset=cyrillic);
 
 html, body {
-  overflow: hidden;
+  // overflow: hidden;
 }
 
 .auth0-lock.auth0-lock,

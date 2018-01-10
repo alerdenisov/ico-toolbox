@@ -15,17 +15,18 @@ class SaleService {
     this.affilatedCollection = affilatedCollection
     this.userClient = userClient
     this.redis = redis
+    this.latestUpdate = 0
     ObjectId = mongo.ObjectId
   }
 
   async shipTokens (tx, req, reply) {
     // complete transaction
-    const { userId, txId, currency, btcAmount } = tx
+    const { userId, txId, currency, btcAmount, status } = tx
     // TODO: get price
     const tokensAmount = btcAmount * 50000
     await execRedis(this.redis, 'zadd', [`sale:${userId}:tokens:all`, tokensAmount, txId])
 
-    if (req.status >= 100) {
+    if (status >= 100) {
       await execRedis(this.redis, 'zadd', [`sale:${userId}:tokens:confirmed`, tokensAmount, txId])
     } else {
       await execRedis(this.redis, 'zadd', [`sale:${userId}:tokens:pending`, tokensAmount, txId])
@@ -37,8 +38,35 @@ class SaleService {
       currency,
       btcAmount,
       tokensAmount,
-      updateAt: Math.trunc(new Date().getTime() / 1000)
+      status,
+      updateAt: Math.trunc(new Date().getTime() / 1000),
     }, { upsert: true })
+  }
+
+  async updateTotal (req, reply, force) {
+    // if (new Date().getTime() > this.latestUpdate + 1000 * 60 * 60) {
+    if (new Date().getTime() > this.latestUpdate) {
+      const allTx = await this.saleCollection.find({
+        status: { $gte: 100}
+      }).toArray()
+
+      console.log(allTx)
+      const total = await allTx.reduce((acc, current) => {
+        const {btcAmount, tokensAmount } = current
+        acc.btcAmount += btcAmount
+        acc.tokensAmount += tokensAmount
+        return acc
+      }, {
+        btcAmount: 0,
+        tokensAmount: 0
+      })
+
+      await execRedis(this.redis, 'set', ['sale:total-sold', JSON.stringify(total)])
+      this.latestUpdate = new Date().getTime()
+      return total
+    } else {
+      return JSON.parse(await execRedis(this.redis, 'get', ['sale:total-sold']))
+    }
   }
 
   async getBalance (type, req, reply) {
@@ -55,11 +83,10 @@ class SaleService {
   }
   
   async getProgress (req, reply) {
-    const sold = Math.random() * 10 * 1e6
-    const raised = sold / 50000
+    const { tokensAmount, btcAmount } = await this.updateTotal(req, reply)
     return {
-      sold,
-      raised
+      tokensAmount,
+      btcAmount
     }
   }
 

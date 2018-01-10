@@ -59,7 +59,7 @@ export default {
     },
 
     secondsValue () {
-      return this.distance % 60
+      return Math.trunc(this.distance % 60)
     },
 
     minutesValue () {

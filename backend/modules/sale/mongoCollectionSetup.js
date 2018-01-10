@@ -25,6 +25,7 @@ module.exports = async function (db, affilatedCollection, saleCollection) {
       currency: { $type: 'string' },
       btcAmount: { $type: 'number' },
       tokensAmount: { $type: 'number' },
+      status: { $type: 'number' },
       updateAt: { $type: 'number' }
     }
   })

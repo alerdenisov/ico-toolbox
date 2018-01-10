@@ -6,7 +6,6 @@
           transaction-table(:transactions='myTransactions' ref='table' :maxHeight='maxHeight')
         el-tab-pane(label='100 latest' name='latest')
           transaction-table(:transactions='transactions' :maxHeight='maxHeight')
-
 </template>
 
 <script>
@@ -37,6 +36,10 @@ export default {
 
     async myTransactions () {
       return (await this.$api.myTransactions(this.session)).data
+    },
+
+    async test () {
+      return (await this.$api.testtx(this.session)).data
     }
   },
   mounted () {
