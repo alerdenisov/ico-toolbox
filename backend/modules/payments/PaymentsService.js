@@ -75,10 +75,10 @@ class PaymentsService {
 
     // store current rate in wallet record
     wallet.rate_btc = parseFloat(rates[currency].rate_btc)
-    wallet.expireAt = (new Date().getTime() / 1000) + (60 * 60)
+    wallet.expireAt = (new Date().getTime() / 1000) + (60 * 180)
 
     // Set lifetime of wallet on 1 hour
-    await execRedis(this.redis, 'set', [`payments:${user._id}:${currency}`, JSON.stringify(wallet), 'EX', 60 * 60])
+    await execRedis(this.redis, 'set', [`payments:${user._id}:${currency}`, JSON.stringify(wallet), 'EX', 60 * 180])
 
     // Store user generated wallet forever (just for case if someone will send money after expired time) 
     await execRedis(this.redis, 'set', [`payments:wallets:${wallet.address}`, user._id])
