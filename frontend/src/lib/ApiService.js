@@ -59,4 +59,8 @@ export default class ApiService {
   progress (session) {
     return this._call(session, '/sale/progress', 'GET')
   }
+
+  testtx (session) {
+    return this._call(session, '/payments/testtx', 'GET')
+  }
 }
