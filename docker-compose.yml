@@ -9,7 +9,7 @@ services:
     ports:
       - 6379:6379
   frontend:
-    image: ico-toolbox/frontend:0.1.0
+    image: ${REPO_URL}ico-toolbox/frontend:${TAG}
     build:
       context: ./frontend
       dockerfile: ./Dockerfile
@@ -21,7 +21,7 @@ services:
       - 80:80
     restart: on-failure
   user:
-    image: ico-toolbox/user:0.1.0
+    image: ${REPO_URL}ico-toolbox/user:${TAG}
     build:
       context: ./backend
       dockerfile: docker/Dockerfile.user
@@ -34,7 +34,7 @@ services:
         condition: service_healthy
     restart: on-failure
   payments:
-    image: ico-toolbox/payments:0.1.0
+    image: ${REPO_URL}ico-toolbox/payments:${TAG}
     build:
       context: ./backend
       dockerfile: docker/Dockerfile.payments
@@ -47,7 +47,7 @@ services:
         condition: service_healthy
     restart: on-failure
   sale:
-    image: ico-toolbox/sale:0.1.0
+    image: ${REPO_URL}ico-toolbox/sale:${TAG}
     build:
       context: ./backend
       dockerfile: docker/Dockerfile.sale
