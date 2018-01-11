@@ -6,6 +6,7 @@ const { promisify } = require('util')
 const boom = require('boom')
 
 module.exports = async function (fastify, opts) {
+  console.log(process.env)
   // This is a plugin registration inside a plugin
   // fastify-env checks and coerces `opts` and save the result in `fastify.config`
   // See https://github.com/fastify/fastify-env
@@ -45,6 +46,8 @@ module.exports = async function (fastify, opts) {
   fastify.register(require('fastify-formbody'))
   
   fastify.register(async function (fastify, opts) {
+    console.log(fastify.config)
+    console.log(opts)
     fastify.register(require('../../lib/fastify-coinpayments'), {
       COINPAYMENTS_PRIVATE_KEY: fastify.config.COINPAYMENTS_PRIVATE_KEY,
       COINPAYMENTS_PUBLIC_KEY: fastify.config.COINPAYMENTS_PUBLIC_KEY,
