@@ -3,3 +3,4 @@ third
 storage
 mongo
 redis
+.DS_Store
