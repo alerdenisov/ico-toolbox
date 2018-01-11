@@ -4,7 +4,6 @@ services:
     image: healthcheck/mongo
     ports:
       - 27017:27017
-      - 28017:28017
   redis:
     image: redis:alpine
     ports:
@@ -22,7 +21,7 @@ services:
       - 80:80
     restart: on-failure
   user:
-    image: ico-toolbox/user
+    image: ico-toolbox/user:0.1.0
     build:
       context: ./backend
       dockerfile: docker/Dockerfile.user
@@ -35,7 +34,7 @@ services:
         condition: service_healthy
     restart: on-failure
   payments:
-    image: ico-toolbox/payments
+    image: ico-toolbox/payments:0.1.0
     build:
       context: ./backend
       dockerfile: docker/Dockerfile.payments
@@ -48,7 +47,7 @@ services:
         condition: service_healthy
     restart: on-failure
   sale:
-    image: ico-toolbox/sale
+    image: ico-toolbox/sale:0.1.0
     build:
       context: ./backend
       dockerfile: docker/Dockerfile.sale
