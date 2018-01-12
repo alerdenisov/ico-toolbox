@@ -51,7 +51,8 @@ export default {
 
   data () {
     return {
-      loading: true
+      loading: false,
+      authOpen: false
     }
   },
 
@@ -69,6 +70,7 @@ export default {
       this.loading = true
       await this.checkErrors()
       await this.checkCoins()
+      await this.checkProfile()
       this.loading = false
     },
     async checkErrors () {
@@ -93,12 +95,18 @@ export default {
         }, {})
         this.$store.dispatch(ACTION_TYPES.ReceiveCoins, coins)
       }
+    },
+
+    async checkProfile () {
+      if (this.session) {
+        const profile = (await this.$api.login(this.session)).data
+        this.$store.dispatch(ACTION_TYPES.ReceiveProfile, profile)
+      }
     }
   },
 
   mounted () {
     this.checkState()
-    console.log(this.$route)
   },
 
   watch: {

@@ -10,9 +10,9 @@ Vue.use(Vuex)
 
 const vuexLocalStorage = new VuexPersist({
   key: 'vuex',
-  storage: window.localStorage
-  // TODO: implement reducer to store only important data
-  // reducer: state => ({ user: state.user })
+  storage: window.localStorage,
+  reducer: state => ({
+  })
 })
 
 const store = new Vuex.Store({
