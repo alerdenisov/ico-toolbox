@@ -16,6 +16,8 @@ en:
           el-menu-item(index='contribute' route='/contribute') Contribute
           el-menu-item(index='affilate' route='/affilate') Affilate
           el-menu-item(index='transactions' route='/transactions') Transactions
+          el-menu-item(index='events' route='/events' v-if='isAdmin') Events Log
+          el-menu-item(index='contributors' route='/contributors' v-if='isAdmin') Contributors
       el-main(:class='b("screen")')
         div(:class='b("content")')
           router-view(:class='b("view")')
@@ -51,11 +53,15 @@ export default {
 
   data () {
     return {
-      loading: true
+      loading: false,
+      authOpen: false
     }
   },
 
   computed: {
+    isAdmin () {
+      return this.profile.roles && this.profile.roles.indexOf('admin') !== -1
+    },
     ...mapState([
       'session',
       'profile',
@@ -69,6 +75,7 @@ export default {
       this.loading = true
       await this.checkErrors()
       await this.checkCoins()
+      await this.checkProfile()
       this.loading = false
     },
     async checkErrors () {
@@ -93,12 +100,18 @@ export default {
         }, {})
         this.$store.dispatch(ACTION_TYPES.ReceiveCoins, coins)
       }
+    },
+
+    async checkProfile () {
+      if (this.session) {
+        const profile = (await this.$api.me(this.session)).data
+        this.$store.dispatch(ACTION_TYPES.ReceiveProfile, profile)
+      }
     }
   },
 
   mounted () {
     this.checkState()
-    console.log(this.$route)
   },
 
   watch: {
