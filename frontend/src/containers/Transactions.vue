@@ -44,7 +44,7 @@ export default {
     }
   },
   mounted () {
-    // this.resizeTimeout = setTimeout(() => this.resize(), 1000)
+    this.resizeTimeout = setTimeout(() => this.resize(), 1000)
   },
   beforeRouteLeave (to, from, next) {
     // console.log('leave')

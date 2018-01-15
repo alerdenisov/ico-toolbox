@@ -7,7 +7,7 @@
           img(:src='coinIcon(scope.row.currency)' :class='b("currency-icon")')
           span(:class="b('currency-name')") {{ scope.row.currency }}
     el-table-column(prop='address' label='Address')
-    el-table-column(prop='status' label='Status' width="180")
+    el-table-column(prop='status' label='Status' width="140")
       template(slot-scope='scope')
         el-tag(:type='txStatusType(scope.row.status)' :class="b('status')") 
           i(:class='txStatusIcon(scope.row.status)')

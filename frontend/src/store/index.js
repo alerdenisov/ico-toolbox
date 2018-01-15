@@ -12,7 +12,8 @@ const vuexLocalStorage = new VuexPersist({
   key: 'vuex',
   storage: window.localStorage,
   reducer: state => ({
-    session: state.session
+    session: state.session,
+    usedMails: state.usedMails
   })
 })
 
