@@ -107,7 +107,7 @@ class PaymentsService {
   }
 
   async getTransactions(req, reply) {
-    return await this.paymentsCollection.find({}).limit(100).toArray()
+    return await this.paymentsCollection.find({}).limit(25).toArray()
   }
 
   async transactionEvent(event, req, reply) {
