@@ -4,7 +4,7 @@
       el-tabs(v-model='showType')
         el-tab-pane(label='Your', name='your')
           transaction-table(:transactions='myTransactions' ref='table' :maxHeight='maxHeight')
-        el-tab-pane(label='100 latest' name='latest')
+        el-tab-pane(label='25 latest' name='latest')
           transaction-table(:transactions='transactions' :maxHeight='maxHeight')
 </template>
 
@@ -44,7 +44,7 @@ export default {
     }
   },
   mounted () {
-    // this.resizeTimeout = setTimeout(() => this.resize(), 1000)
+    this.resizeTimeout = setTimeout(() => this.resize(), 1000)
   },
   beforeRouteLeave (to, from, next) {
     // console.log('leave')

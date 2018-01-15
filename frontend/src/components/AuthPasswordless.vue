@@ -22,8 +22,11 @@
         label-width='100%'
         @keydown.enter.prevent="true"
         :rules="authRules.email")
-        el-input(
-          v-model='auth.email' 
+        el-autocomplete(
+          v-model='auth.email'
+          :fetch-suggestions="suggestMail"
+          style='width:100%'
+          @select='selectMail'
           @keyup.enter.native='allowAuthNext ? authNext() : null')
           template(slot="prepend")
             i(class="el-icon-message")
@@ -55,6 +58,10 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+import { ACTION_TYPES } from '@/constants'
+import sleep from 'await-sleep'
+
 const ENTER_MAIL = 1
 const ENTER_CODE = 2
 const VERIFY = 3
@@ -63,6 +70,10 @@ export default {
   name: 'auth-passwordless',
   dependencies: ['$auth'],
   props: ['show'],
+
+  computed: {
+    ...mapState(['usedMails'])
+  },
 
   data () {
     return {
@@ -85,6 +96,19 @@ export default {
     }
   },
   methods: {
+    suggestMail (input, cb) {
+      const used = [...this.usedMails].map(email => ({ value: email }))
+      const result = input ? used.filter(mail => mail.value.startsWith(input.toLowerCase())) : used
+      console.log(result)
+      cb(result)
+    },
+    async selectMail (mail) {
+      // this.auth.email = mail.value
+      // console.log(mail.value)
+      await sleep(200)
+      this.updateAuthFormAllowance()
+      this.authNext()
+    },
     updateAuthFormAllowance () {
       if (this.authStep === 1) {
         this.$refs.authForm.validateField('email', error => {
@@ -117,6 +141,7 @@ export default {
         case ENTER_CODE:
           console.log('send mail')
           try {
+            this.$store.dispatch(ACTION_TYPES.UsedMail, this.auth.email)
             const result = await this.$auth.sendEmail(this.auth.email)
             console.log(result)
           } catch (err) {

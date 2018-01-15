@@ -1,4 +1,5 @@
 import { MUTATION_TYPES } from '@/constants'
+import Vue from 'vue'
 
 export default {
   [MUTATION_TYPES.Authentication] (state, session) {
@@ -6,6 +7,18 @@ export default {
   },
   [MUTATION_TYPES.ReceiveProfile] (state, profile) {
     state.profile = profile
+  },
+  [MUTATION_TYPES.UsedMail] (state, mail) {
+    if (typeof mail !== 'string' || mail.length < 4) {
+      return
+    }
+
+    const sanitazedMail = mail.toLowerCase()
+    if (state.usedMails.indexOf(sanitazedMail) !== -1) {
+      return
+    }
+
+    Vue.set(state.usedMails, state.usedMails.length, sanitazedMail)
   },
   [MUTATION_TYPES.Logout] (state) {
     state.session = null

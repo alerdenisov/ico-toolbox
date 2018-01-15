@@ -7,6 +7,8 @@ import Dashboard from '@/containers/Dashboard'
 import Contribute from '@/containers/Contribute'
 import Affilate from '@/containers/Affilate'
 import Transactions from '@/containers/Transactions'
+import Contributors from '@/containers/Contributors'
+import Events from '@/containers/Events'
 import AuthenticationCallback from '@/containers/AuthenticationCallback'
 
 Vue.use(Router)
@@ -38,6 +40,16 @@ const router = new Router({
       path: '/transactions',
       name: 'Transactions',
       component: Transactions
+    },
+    {
+      path: '/contributors',
+      name: 'Contributors',
+      component: Contributors
+    },
+    {
+      path: '/events',
+      name: 'Events',
+      component: Events
     },
     {
       path: '/auth/callback',

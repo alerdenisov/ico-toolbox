@@ -14,6 +14,7 @@ ru:
       h2 Select contribution currency
       div(style='display: flex; flex-wrap: wrap')
         currency-button(
+          :class="b('currency')"
           v-for='currency in currencies'
           :key='currency'
           :ticker='currency'
@@ -109,6 +110,10 @@ export default {
     max-width: 650px;
     width: 100%;
     margin-bottom: 30px; 
+  }
+
+  &__currency {
+    flex: 1;
   }
 }
 </style>
