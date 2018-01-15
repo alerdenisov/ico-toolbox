@@ -39,7 +39,8 @@ class UserService {
       name: profile.given_name + ' ' + profile.family_name,
       nickname: profile.nickname || (profile.given_name + ' ' + profile.family_name),
       picture: profile.picture || 'https://developmentseed.org/images/team/avatar-placeholder.png',
-      gender: profile.gender || 'unknown'
+      gender: profile.gender || 'unknown',
+      roles: profile.roles
     }
   }
 

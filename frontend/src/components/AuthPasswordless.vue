@@ -10,14 +10,21 @@
       el-step(title='Code')
       el-step(title='Verify')
 
-    el-form(:model='auth' label-position='top' ref='authForm')
+    el-form(
+      :model='auth'
+      label-position='top'
+      ref='authForm'
+      @submit.native.prevent='')
       el-form-item(
         prop='email'
         v-if='authStep === 1'
         label='Enter your email to sign in or create an account' 
         label-width='100%'
+        @keydown.enter.prevent="true"
         :rules="authRules.email")
-        el-input(v-model='auth.email')
+        el-input(
+          v-model='auth.email' 
+          @keyup.enter.native='allowAuthNext ? authNext() : null')
           template(slot="prepend")
             i(class="el-icon-message")
 
@@ -26,8 +33,12 @@
         v-if='authStep === 2'
         :label='`An email with the code has been sent to ${auth.email}`'
         label-width='100%'
+        @submit.prevent=""
         :rules="authRules.code")
-        el-input(v-model='auth.code' auto-complete='off')
+        el-input(
+          v-model='auth.code' 
+          auto-complete='off' 
+          @keyup.enter.native='allowAuthNext ? authNext() : null')
           template(slot="prepend")
             i(class="el-icon-more")
 

@@ -9,7 +9,7 @@ export default class AuthService {
       clientID: 'fSCBGh15rlKaKyhzkrfq1w2tROQibzrE',
       domain: 'aofg.eu.auth0.com',
       redirectUri: window.location.origin + '/auth/callback',
-      responseType: 'token'
+      responseType: 'token id_token'
     })
     // this.auth0passwordless = new Auth0LockPasswordless(
     //   'fSCBGh15rlKaKyhzkrfq1w2tROQibzrE',

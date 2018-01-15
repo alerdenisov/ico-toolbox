@@ -21,7 +21,8 @@ export default {
   data () {
     return {
       showType: 'your',
-      maxHeight: 200
+      maxHeight: 200,
+      resizeTimeout: null
     }
   },
   computed: {
@@ -43,11 +44,16 @@ export default {
     }
   },
   mounted () {
-    setTimeout(() => this.resize(), 200)
-    window.addEventListener('resize', () => this.resize())
+    // this.resizeTimeout = setTimeout(() => this.resize(), 1000)
+  },
+  beforeRouteLeave (to, from, next) {
+    // console.log('leave')
+    // clearTimeout(this.resizeTimeout)
+    next()
   },
   methods: {
     resize () {
+      console.log(this.$refs)
       const el = this.$refs.table.$el
       const top = el.getBoundingClientRect().top
       const windowHeight = window.innerHeight

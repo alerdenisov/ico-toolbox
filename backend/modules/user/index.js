@@ -75,6 +75,7 @@ async function registerRoutes (fastify, opts) {
   fastify.get('/login', async (req, reply) => {
     const token = req.headers.authorization
     const profile = await fastify.auth0.profile(req.headers.authorization)
+    console.log(profile)
     await fastify.userService.updateProfile(profile, token)
     return await fastify.userService.getProfile(token)
   })

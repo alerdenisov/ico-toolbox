@@ -12,6 +12,7 @@ const vuexLocalStorage = new VuexPersist({
   key: 'vuex',
   storage: window.localStorage,
   reducer: state => ({
+    session: state.session
   })
 })
 

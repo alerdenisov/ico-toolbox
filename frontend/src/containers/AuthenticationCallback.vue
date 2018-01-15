@@ -9,8 +9,11 @@ export default {
   name: 'auth-callback',
   dependencies: ['$auth', '$api'],
   async mounted () {
-    const authResult = await this.$auth.callback(window.location.hash)
-    this.$store.dispatch(ACTION_TYPES.Authentication, authResult)
+    const session = await this.$auth.callback(window.location.hash)
+    console.log(session)
+    const profile = (await this.$api.login(session)).data
+    this.$store.dispatch(ACTION_TYPES.Authentication, session)
+    this.$store.dispatch(ACTION_TYPES.ReceiveProfile, profile)
     this.$router.push('/dashboard')
   }
 }
