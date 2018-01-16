@@ -19,7 +19,7 @@ en:
             el-menu-item(index='contribute' route='/contribute') Contribute
             //- el-menu-item(index='affilate' route='/affilate') Affilate
             el-menu-item(index='transactions' route='/transactions') Transactions
-            //- el-menu-item(index='events' route='/events' v-if='isAdmin') Events Log
+            el-menu-item(index='events' route='/events' v-if='isAdmin') Events Log
             //- el-menu-item(index='contributors' route='/contributors' v-if='isAdmin') Contributors
         el-main(:class='b("screen")')
           div(:class='b("content")')
@@ -127,7 +127,7 @@ export default {
   },
 
   watch: {
-    '$route': function() {
+    '$route': function () {
       this.showMenu = false
       this.checkState()
     }
