@@ -22,14 +22,18 @@ module.exports = async function (fastify, opts) {
         'SALE_REDIS_URL',
         'SALE_SERVICE_SECRET',
         'USER_SERVICE_URL',
-        'PAYMENTS_SERVICE_URL'
+        'PAYMENTS_SERVICE_URL',
+        'LOGS_SERVICE_URL',
+        'LOGS_SERVICE_SECRET'
       ],
       properties: {
         SALE_MONGO_URL: { type: 'string' },
         SALE_REDIS_URL: { type: 'string' },
         SALE_SERVICE_SECRET: { type: 'string' },
         USER_SERVICE_URL: { type: 'string' },
-        PAYMENTS_SERVICE_URL: { type: 'string' }
+        PAYMENTS_SERVICE_URL: { type: 'string' },
+        LOGS_SERVICE_URL: { type: 'string' },
+        LOGS_SERVICE_SECRET: { type: 'string' }
       }
     },
     data: opts
@@ -63,6 +67,7 @@ module.exports = async function (fastify, opts) {
       require('./mongoCollectionSetup')(fastify.mongo.db, fastify.affilatedCollection, fastify.saleCollection)
     })
 
+    fastify.register(require('../../clients/logs'), fastify.config)
     fastify.register(require('../../clients/user'), fastify.config)
 
     fastify.register(fp(async function (fastify, opts) {

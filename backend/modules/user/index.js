@@ -12,14 +12,16 @@ module.exports = async function (fastify, opts) {
         'USER_REDIS_URL',
         'AUTH0_DOMAIN',
         'AUTH0_CLIENT_ID',
-        'AUTH0_CLIENT_SECRET'
+        'AUTH0_CLIENT_SECRET',
+        'LOGS_SERVICE_URL'
       ],
       properties: {
         USER_MONGO_URL: { type: 'string' },
         USER_REDIS_URL: { type: 'string' },
         AUTH0_DOMAIN: { type: 'string' },
         AUTH0_CLIENT_ID: { type: 'string' },
-        AUTH0_CLIENT_SECRET: { type: 'string' }
+        AUTH0_CLIENT_SECRET: { type: 'string' },
+        LOGS_SERVICE_URL: { type: 'string' }
       }
     },
     data: opts
@@ -76,11 +78,33 @@ async function registerRoutes (fastify, opts) {
     const token = req.headers.authorization
     const profile = await fastify.auth0.profile(req.headers.authorization)
     console.log(profile)
+
+    this.logs.send({
+      sender: 'user',
+      message: 'login',
+      args: {
+        profile,
+        token
+      }
+    })
+
     await fastify.userService.updateProfile(profile, token)
     return await fastify.userService.getProfile(token)
   })
 
   fastify.get('/me', async (req, reply) => {
-    return await fastify.userService.getProfile(req.headers.authorization)
+    const token = req.headers.authorization
+    const profile = await fastify.userService.getProfile(token)
+    
+    this.logs.send({
+      sender: 'user',
+      message: 'me',
+      args: {
+        profile,
+        token
+      }
+    })
+
+    return profile
   })
 }

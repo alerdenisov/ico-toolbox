@@ -8,23 +8,32 @@ class SaleService {
     saleCollection,
     affilatedCollection,
     userClient,
+    logs,
     redis,
     mongo
   }) {
     this.saleCollection = saleCollection
     this.affilatedCollection = affilatedCollection
     this.userClient = userClient
+    this.logs = logs
     this.redis = redis
     this.latestUpdate = 0
     ObjectId = mongo.ObjectId
   }
 
   async shipTokens (tx, req, reply) {
-    // complete transaction
     const { userId, txId, currency, btcAmount, status } = tx
-    // TODO: get price
     const tokensAmount = btcAmount * 50000
     await execRedis(this.redis, 'zadd', [`sale:${userId}:tokens:all`, tokensAmount, txId])
+
+    this.logs.send({
+      sender: 'sale',
+      message: 'transaction',
+      args: {
+        tx,
+        tokensAmount
+      }
+    })
 
     if (status >= 100) {
       await execRedis(this.redis, 'zadd', [`sale:${userId}:tokens:confirmed`, tokensAmount, txId])
@@ -50,7 +59,6 @@ class SaleService {
         status: { $gte: 100}
       }).toArray()
 
-      console.log(allTx)
       const total = await allTx.reduce((acc, current) => {
         const {btcAmount, tokensAmount } = current
         acc.btcAmount += btcAmount
@@ -63,6 +71,14 @@ class SaleService {
 
       await execRedis(this.redis, 'set', ['sale:total-sold', JSON.stringify(total)])
       this.latestUpdate = new Date().getTime()
+
+
+      this.logs.send({
+        sender: 'sale',
+        message: 'total-recalculation',
+        args: total
+      })
+
       return total
     } else {
       return JSON.parse(await execRedis(this.redis, 'get', ['sale:total-sold']))
