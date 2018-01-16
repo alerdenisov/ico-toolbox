@@ -24,6 +24,8 @@ module.exports = async function (fastify, opts) {
         'COINPAYMENTS_PUBLIC_KEY',
         'COINPAYMENTS_IPN', 
         'COINPAYMENTS_IPN_TIME',
+        'LOGS_SERVICE_URL',
+        'LOGS_SERVICE_SECRET'
       ],
       properties: {
         PAYMENTS_MONGO_URL: { type: 'string' },
@@ -36,7 +38,9 @@ module.exports = async function (fastify, opts) {
         COINPAYMENTS_PRIVATE_KEY: { type: 'string' },
         COINPAYMENTS_PUBLIC_KEY: { type: 'string' },
         COINPAYMENTS_IPN: { type: 'boolean' },
-        COINPAYMENTS_IPN_TIME: { type: 'integer' }
+        COINPAYMENTS_IPN_TIME: { type: 'integer' },
+        LOGS_SERVICE_URL: { type: 'string' },
+        LOGS_SERVICE_SECRET: { type: 'string' }
       }
     },
     data: opts
@@ -78,6 +82,7 @@ module.exports = async function (fastify, opts) {
       require('./mongoCollectionSetup')(fastify.mongo.db, fastify.paymentsCollection, fastify.walletsCollection)
     })
 
+    fastify.register(require('../../clients/logs'), fastify.config)
     fastify.register(require('../../clients/user'), fastify.config)
     fastify.register(require('../../clients/sale'), fastify.config)
 

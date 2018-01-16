@@ -32,6 +32,7 @@ module.exports = async function (fastify, opts) {
         .header('Content-Type', 'application/json')
         .send()
     })
+    .register(require('./modules/logs'), { prefix: '/api/logs' })
     .register(require('./modules/user'), { prefix: '/api/user' })
     .register(require('./modules/payments'), { prefix: '/api/payments'})
     .register(require('./modules/sale'), { prefix: '/api/sale'})

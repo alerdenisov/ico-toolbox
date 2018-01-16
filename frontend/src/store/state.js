@@ -14,5 +14,6 @@ export default {
   saleProgress: {
     sold: 0,
     raised: 0
-  }
+  },
+  usedMails: []
 }

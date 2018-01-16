@@ -3,26 +3,32 @@ en:
   NotSigned: You should to authenticate first
 </i18n>
 <template lang="pug">
-  div(:class='b()' v-loading='loading' v-if='session && profile')
-    el-header(:class='b("header-wrapper")')
-    el-container(:class='b("screen-wrapper")')
-      el-aside(:class='b("sidebar")')
-        user-badge(:profile='profile' :balance='balance')
-        el-menu(
-          :class='b("menu")'
-          :router='true'
-          mode='vertical')
-          el-menu-item(index='dashboard' route='/dashboard') Sale
-          el-menu-item(index='contribute' route='/contribute') Contribute
-          el-menu-item(index='affilate' route='/affilate') Affilate
-          el-menu-item(index='transactions' route='/transactions') Transactions
+  div(:class='b()' v-if='!loading')
+    div(:class='b("wrapper")' v-if='session && profile')
+      el-header(:class='b("header-wrapper")')
+        div(:class='b("toggle-mobile")' @click='showMenu = !showMenu')
+          awesome-icon(name='align-justify')
+      el-container(:class='b("screen-wrapper")')
+        el-aside(:class='b("sidebar", { active: showMenu })' width='280px')
+          user-badge(:profile='profile' :balance='balance')
+          el-menu(
+            :class='b("menu")'
+            :router='true'
+            mode='vertical')
+            el-menu-item(index='dashboard' route='/dashboard') Sale
+            el-menu-item(index='contribute' route='/contribute') Contribute
+            //- el-menu-item(index='affilate' route='/affilate') Affilate
+            el-menu-item(index='transactions' route='/transactions') Transactions
+            el-menu-item(index='events' route='/events' v-if='isAdmin') Events Log
+            //- el-menu-item(index='contributors' route='/contributors' v-if='isAdmin') Contributors
+        el-main(:class='b("screen")')
+          div(:class='b("content")')
+            router-view(:class='b("view")')
+    div(:class='b()' v-else)
       el-main(:class='b("screen")')
-        div(:class='b("content")')
-          router-view(:class='b("view")')
-  div(:class='b()' v-else)
-    el-main(:class='b("screen")')
-        div(:class='b("content")')
-          router-view(:class='b("view")')
+          div(:class='b("content")')
+            router-view(:class='b("view")')
+  div(:class='b()' v-else v-loading='true')
 </template>
 
 <script>
@@ -33,7 +39,7 @@ import UserBadge from '@/components/UserBadge'
 
 export default {
   name: 'app',
-  dependencies: ['$api'],
+  dependencies: ['$api', '$error'],
 
   components: {
     UserBadge
@@ -51,11 +57,16 @@ export default {
 
   data () {
     return {
-      loading: true
+      loading: true,
+      authOpen: false,
+      showMenu: false
     }
   },
 
   computed: {
+    isAdmin () {
+      return this.profile.roles && this.profile.roles.indexOf('admin') !== -1
+    },
     ...mapState([
       'session',
       'profile',
@@ -66,10 +77,18 @@ export default {
 
   methods: {
     async checkState () {
-      this.loading = true
-      await this.checkErrors()
-      await this.checkCoins()
-      this.loading = false
+      try {
+        console.log('start check')
+        this.loading = true
+        await this.checkErrors()
+        await this.checkCoins()
+        await this.checkProfile()
+        this.loading = false
+        console.log('end check')
+      } catch (e) {
+        this.loading = false
+        this.$error(e, true)
+      }
     },
     async checkErrors () {
       const error = this.$route.query.error
@@ -93,16 +112,25 @@ export default {
         }, {})
         this.$store.dispatch(ACTION_TYPES.ReceiveCoins, coins)
       }
+    },
+
+    async checkProfile () {
+      if (this.session) {
+        const profile = (await this.$api.login(this.session)).data
+        this.$store.dispatch(ACTION_TYPES.ReceiveProfile, profile)
+      }
     }
   },
 
   mounted () {
     this.checkState()
-    console.log(this.$route)
   },
 
   watch: {
-    '$route': 'checkState'
+    '$route': function () {
+      this.showMenu = false
+      this.checkState()
+    }
   }
 }
 </script>
@@ -159,6 +187,12 @@ h1, h2, h3, h4, h5, h6, p {
 
   min-height: 100vh;
   
+  &__wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
   &__menu {
     border: 0;
   }
@@ -171,6 +205,9 @@ h1, h2, h3, h4, h5, h6, p {
 
   &__screen {
     display: flex;
+    @media screen and (max-width: 480px){
+      padding: 20px 10px;
+    }
   }
 
   &__content {
@@ -180,10 +217,64 @@ h1, h2, h3, h4, h5, h6, p {
     // justify-content: center;
   }
 
+  &__view {
+    max-width: calc(100vw - 40px - 280px);
+    @media screen and (max-width: 920px){
+      max-width: calc(100vw - 40px);
+    }
+    @media screen and (max-width: 480px){
+      max-width: calc(100vw - 20px);
+    }
+  }
+
   &__sidebar {
     background-color: white;
     border-right: 1px solid #ebeef5;
+
+    @media screen and (max-width: 920px) {
+      position: absolute;
+      width: 100% !important;
+      height: 100%;
+      border: 0;
+      display: none;
+      z-index: 1;
+    }
+
+    &--active {
+      display: block;
+    }
     // padding: 20px
+  }
+
+  &__header-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  &__toggle-mobile {
+    padding: 10px;
+    margin-left: auto;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    display: none;
+
+    @media screen and (max-width: 920px) {
+      display: block;
+    }
+
+    &:hover {
+      opacity: 1;
+      border-color: rgba(255,255,255,0.5);
+      box-shadow: 0 0 3px rgba(255,255,255,0.3);
+    }
   }
 }
 </style>

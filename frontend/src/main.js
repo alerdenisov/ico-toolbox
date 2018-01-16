@@ -82,11 +82,31 @@ import { ApiService, AuthService } from '@/lib/services'
 import injector from 'vue-inject'
 import 'vue-awesome/icons/sign-out'
 import 'vue-awesome/icons/refresh'
+import 'vue-awesome/icons/align-justify'
 import AwesomeIcon from 'vue-awesome/components/Icon'
+import { ACTION_TYPES } from '@/constants'
 Vue.component('awesome-icon', AwesomeIcon)
 
 injector.service('$auth', AuthService)
 injector.service('$api', ApiService)
+
+function fireError (error, forceHome) {
+  if (!forceHome) {
+    VueInstance.$notify.error({
+      title: 'Error',
+      message: error.toString()
+    })
+  } else {
+    store.dispatch(ACTION_TYPES.Logout)
+    router.push({
+      path: '/',
+      query: { error: error.toString() }
+    })
+  }
+}
+
+injector.constant('$error', fireError)
+
 Vue.use(injector)
 Vue.use(vueBemCn)
 Vue.use(AsyncComputed)
@@ -170,12 +190,17 @@ Vue.prototype.$message = Message
 
 Vue.config.productionTip = false
 
+Vue.config.errorHandler = function (error) {
+  fireError(error)
+  console.error(error)
+}
+
 const i18n = new VueI18n({
   locale: 'en'
 })
 
 /* eslint-disable no-new */
-new Vue({
+const VueInstance = new Vue({
   el: '#app',
   store,
   router,

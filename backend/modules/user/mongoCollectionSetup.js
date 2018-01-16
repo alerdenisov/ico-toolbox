@@ -11,7 +11,8 @@ module.exports = async function (db, userCollection) {
       name: { $type: 'string' },
       nickname: { $type: 'string' },
       picture: { $type: 'string' },
-      gender: { $type: 'string' }
+      gender: { $type: 'string' },
+      roles: { $type: 'array' }
     }
   })
 

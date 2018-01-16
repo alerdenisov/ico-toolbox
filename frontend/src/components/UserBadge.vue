@@ -50,9 +50,11 @@ export default {
   display: flex;
   align-items: center;
   padding: 20px;
+  padding-right: 10px;
 
   background-color: #2c404c;
   color: white;
+
 
   &__image-wrapper {
     margin-right: 10px;
@@ -70,6 +72,7 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    overflow: hidden;
   }
 
   &__nickname {
@@ -77,6 +80,11 @@ export default {
     margin-bottom: 10px;
     font-size: 120%;
     font-weight: bold;
+
+    white-space: nowrap;
+    word-break: keep-all;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   &__balance {

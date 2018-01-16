@@ -4,28 +4,24 @@ services:
     image: healthcheck/mongo
     ports:
       - 27017:27017
-      - 28017:28017
   redis:
     image: redis:alpine
     ports:
       - 6379:6379
   frontend:
-    image: nginx
-    volumes:
-      - ./configs/nginx.conf:/tmp/default.conf
-      - ./frontend/dist:/html:ro
+    image: ${REPO_URL}ico-toolbox/frontend:${TAG}
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
     depends_on:
       - user
       - payments
-      # - sale
+      - sale
     ports:
-      - "80:8000"
-    environment:
-      - NGINX_PORT=8000
-    command: /bin/bash -c "envsubst '$$NGINX_PORT' < /tmp/default.conf > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+      - 80:80
     restart: on-failure
   user:
-    image: ico-toolbox/user
+    image: ${REPO_URL}ico-toolbox/user:${TAG}
     build:
       context: ./backend
       dockerfile: docker/Dockerfile.user
@@ -37,8 +33,21 @@ services:
       mongo:
         condition: service_healthy
     restart: on-failure
+  logs:
+    image: ${REPO_URL}ico-toolbox/logs:${TAG}
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile.logs
+    env_file: .env
+    links:
+      - mongo
+      - redis
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: on-failure
   payments:
-    image: ico-toolbox/payments
+    image: ${REPO_URL}ico-toolbox/payments:${TAG}
     build:
       context: ./backend
       dockerfile: docker/Dockerfile.payments
@@ -51,7 +60,7 @@ services:
         condition: service_healthy
     restart: on-failure
   sale:
-    image: ico-toolbox/sale
+    image: ${REPO_URL}ico-toolbox/sale:${TAG}
     build:
       context: ./backend
       dockerfile: docker/Dockerfile.sale

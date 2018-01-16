@@ -30,10 +30,12 @@ class PaymentsService {
       userClient,
       saleClient,
       coinPayments,
+      logs,
       mongo, 
       redis } = fastify
     this.paymentsCollection = paymentsCollection
     this.walletsCollection = walletsCollection
+    this.logs = logs
     this.redis = redis
     this.coinPayments = coinPayments
     this.userClient = userClient
@@ -83,6 +85,16 @@ class PaymentsService {
     // Store user generated wallet forever (just for case if someone will send money after expired time) 
     await execRedis(this.redis, 'set', [`payments:wallets:${wallet.address}`, user._id])
 
+
+    this.logs.send({
+      sender: 'payments',
+      message: 'create-wallet',
+      args: {
+        wallet,
+        user
+      }
+    })
+
     return wallet
   }
 
@@ -107,7 +119,7 @@ class PaymentsService {
   }
 
   async getTransactions(req, reply) {
-    return await this.paymentsCollection.find({}).limit(100).toArray()
+    return await this.paymentsCollection.find({}).limit(25).toArray()
   }
 
   async transactionEvent(event, req, reply) {
@@ -163,6 +175,12 @@ class PaymentsService {
 
     transaction.userId = transaction.userId.toString()
     this.saleClient.notifyTransaction(transaction)
+
+    this.logs.send({
+      sender: 'payments',
+      message: 'ipn',
+      args: transaction
+    })
     return transaction
   }
 }

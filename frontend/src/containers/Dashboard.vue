@@ -133,6 +133,10 @@ export default {
     font-weight: bold;
     margin: 10px;
     text-align: center;
+
+    @media screen and (max-width: 480px) {
+      font-size: 125%;
+    }
   }
 
   &__deadline-countdown {
@@ -146,10 +150,21 @@ export default {
 
       margin: 0 20px;
 
+      @media screen and (max-width: 920px) {
+        margin: 0 10px;
+      }
+
+      @media screen and (max-width: 480px) {
+        margin: 0 5px;
+      }
+
       &-value {
         font-size: 150%;
         font-weight: bold;
         margin: 10px;
+        @media screen and (max-width: 480px) {
+          font-size: 125%;
+        }
       }
 
       &-help {

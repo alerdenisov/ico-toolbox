@@ -63,4 +63,8 @@ export default class ApiService {
   testtx (session) {
     return this._call(session, '/payments/testtx', 'GET')
   }
+
+  logs (session) {
+    return this._call(session, '/logs/logs', 'GET')
+  }
 }
