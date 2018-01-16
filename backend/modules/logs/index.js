@@ -58,6 +58,16 @@ async function registerRoutes (fastify, opts) {
       return Boom.forbidden('Not enough permissions')
     }
 
-    return await execRedis(fastify.redis, 'zrevrange', ['logs', 0, -1])
+    const raw = await execRedis(fastify.redis, 'zrevrange', ['logs', 0, -1, 'WITHSCORES'])
+    const result = []
+    console.log(raw)
+    for (let index = 0; index < raw.length; index += 2) {
+      result.push({
+        ...JSON.parse(raw[index]),
+        date: parseInt(raw[index + 1])
+      })
+    }
+
+    return result
   })
 }

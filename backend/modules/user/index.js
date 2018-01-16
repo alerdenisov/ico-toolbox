@@ -13,7 +13,8 @@ module.exports = async function (fastify, opts) {
         'AUTH0_DOMAIN',
         'AUTH0_CLIENT_ID',
         'AUTH0_CLIENT_SECRET',
-        'LOGS_SERVICE_URL'
+        'LOGS_SERVICE_URL',
+        'LOGS_SERVICE_SECRET'
       ],
       properties: {
         USER_MONGO_URL: { type: 'string' },
@@ -21,7 +22,9 @@ module.exports = async function (fastify, opts) {
         AUTH0_DOMAIN: { type: 'string' },
         AUTH0_CLIENT_ID: { type: 'string' },
         AUTH0_CLIENT_SECRET: { type: 'string' },
-        LOGS_SERVICE_URL: { type: 'string' }
+        LOGS_SERVICE_URL: { type: 'string' },
+        LOGS_SERVICE_SECRET: { type: 'string' },
+        
       }
     },
     data: opts
@@ -59,6 +62,8 @@ module.exports = async function (fastify, opts) {
       require('./mongoCollectionSetup')(fastify.mongo.db, fastify.userCollection)
     })
 
+    fastify.register(require('../../clients/logs'), fastify.config)
+
     // Add another business logic object to `fastify` instance
     // Again, `fastify-plugin` is used in order to access to `fastify.userService` from outside
     fastify.register(fp(async function (fastify, opts) {
@@ -79,7 +84,7 @@ async function registerRoutes (fastify, opts) {
     const profile = await fastify.auth0.profile(req.headers.authorization)
     console.log(profile)
 
-    this.logs.send({
+    fastify.logs.send({
       sender: 'user',
       message: 'login',
       args: {
@@ -95,15 +100,6 @@ async function registerRoutes (fastify, opts) {
   fastify.get('/me', async (req, reply) => {
     const token = req.headers.authorization
     const profile = await fastify.userService.getProfile(token)
-    
-    this.logs.send({
-      sender: 'user',
-      message: 'me',
-      args: {
-        profile,
-        token
-      }
-    })
 
     return profile
   })
