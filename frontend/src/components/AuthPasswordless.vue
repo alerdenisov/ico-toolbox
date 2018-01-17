@@ -68,7 +68,7 @@ const VERIFY = 3
 
 export default {
   name: 'auth-passwordless',
-  dependencies: ['$auth'],
+  dependencies: ['$auth', '$error'],
   props: ['show'],
 
   computed: {
@@ -155,8 +155,8 @@ export default {
             const result = await this.$auth.verifyEmailCode(this.auth.email, this.auth.code)
             console.log(result)
           } catch (err) {
-            console.error(err)
-            this.authStep--
+            this.$error(JSON.stringify(err), true)
+            this.handleClose()
           }
           break
       }

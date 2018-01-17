@@ -95,7 +95,7 @@ export default {
       if (error) {
         this.$notify.error({
           title: 'Error',
-          message: this.$t(this.$route.query.error)
+          message: this.$route.query.error
         })
       }
     },
