@@ -5,14 +5,28 @@ en:
 </i18n>
 <template lang="pug">
   div(:class="b()" v-loading="loading")
-    el-button(@click='createWallet' v-if='wallet' :class="b('refresh')" size="mini")
-      awesome-icon(name='refresh')
-    span(:class="b('address')") {{ address }}
-    div(:class="b('countdown-wrapper')" v-if='wallet')
-      countdown(:class="b('countdown')" :expireAt='expireAt' :days='false')
+    div(:class="b('inline')")
+      el-button(@click='createWallet' v-if='wallet' :class="b('refresh')" size="mini")
+        awesome-icon(name='refresh')
+      span(:class="b('address')") {{ address }}
+
+    div(:class="b('inline')" v-if='wallet')
+      p(style='margin-top: 15px; margin-right: auto')
+        | Fixed rate for 
+        currency-label(style='font-weight: bold' :ticker='ticker' :value='1' :precision='2')
+        | 
+        span is
+        | 
+        currency-label(style='font-weight: bold' ticker='ETM' :value='rate' :precision='4')
+        |,
+        | expired after:
+      
+      div(:class="b('countdown-wrapper')" v-if='wallet')
+        countdown(:class="b('countdown')" :expireAt='expireAt' :days='false')
 </template>
 <script>
 import Countdown from '@/components/Countdown'
+import CurrencyLabel from '@/components/CurrencyLabel'
 import { mapState } from 'vuex'
 export default {
   name: 'deposit-wallet',
@@ -25,12 +39,20 @@ export default {
     }
   },
   components: {
-    Countdown
+    Countdown,
+    CurrencyLabel
   },
   computed: {
     expireAt () {
       if (this.wallet) {
         return this.wallet.expireAt
+      }
+
+      return 0
+    },
+    rate () {
+      if (this.wallet) {
+        return this.wallet.rate_btc * 50000
       }
 
       return 0
@@ -78,9 +100,12 @@ export default {
 
 <style lang="scss">
 .deposit-wallet {
-  height: 50px;
-  display: flex;
-  align-items: center;
+
+  &__inline {
+    height: 50px;
+    display: flex;
+    align-items: center;
+  }
 
   &__refresh {
     margin-right: 5px;

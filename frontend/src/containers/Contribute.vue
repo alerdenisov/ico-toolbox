@@ -27,6 +27,7 @@ ru:
         rightCurrency='ETM'
         :rate='coinRate(activeCurrency)'
       )
+      el-alert(title="Attention! It can take up to an hour until your transaction is added to the system" type='warning')
     el-card(:class="b('step')" v-if='currencySelected')
       h4 Send your {{ activeCurrency }} to address:
       deposit-wallet(:ticker='activeCurrency')

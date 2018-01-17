@@ -11,13 +11,13 @@ en:
       currency-input(:class="b('input', mods('right'))" :suffix='currentData(rightCurrency)' @input='rightInput' :value='right')
     
     div(:class="b('rate', mods())")
-      p
+      p(style='margin-top: 15px;')
         currency-label(:ticker='leftCurrency' :value='1' :precision='2')
         | 
         span is
         | 
         currency-label(ticker='ETM' :value='rate' :precision='4')
-    el-alert(v-if='rate !== 50000' :title="$t('attention', [leftCurrency])" type="warning")
+    //- el-alert(v-if='rate !== 50000' :title="$t('attention', [leftCurrency])" type="warning")
 </template>
 
 <script>

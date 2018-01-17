@@ -1,11 +1,11 @@
 <template lang="pug">
   div(:class='b()' ref='container')
-    el-card(:class="b('card')")
+    //- el-card(:class="b('card')")
       el-tabs(v-model='showType')
         el-tab-pane(label='Your', name='your')
-          transaction-table(:transactions='myTransactions' ref='table' :maxHeight='maxHeight')
-        el-tab-pane(label='25 latest' name='latest')
-          transaction-table(:transactions='transactions' :maxHeight='maxHeight')
+    transaction-table(:transactions='myTransactions' ref='table' :maxHeight='maxHeight')
+        //- el-tab-pane(label='25 latest' name='latest')
+        //-   transaction-table(:transactions='transactions' :maxHeight='maxHeight')
 </template>
 
 <script>
