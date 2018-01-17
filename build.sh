@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a arr=("frontend" "user" "payments" "sale")
+declare -a arr=("frontend" "user" "payments" "sale" "logs")
 REPO_URL=${REPO_URL:-}
 TAG="${TAG:-latest-dev}"
 echo "test1 ${?}"

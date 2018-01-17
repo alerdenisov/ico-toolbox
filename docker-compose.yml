@@ -72,3 +72,16 @@ services:
       mongo:
         condition: service_healthy
     restart: on-failure
+  logs:
+    image: ${REPO_URL}ico-toolbox/logs:${TAG}
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile.logs
+    env_file: .env
+    links:
+      - mongo
+      - redis
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: on-failure
