@@ -18,8 +18,8 @@ services:
       - payments
       - sale
     volumes:
-      - certs:/etc/letsencrypt
-      - certs-data:/data/letsencrypt
+      - ./certs:/etc/letsencrypt
+      - ./certs/data:/data/letsencrypt
     ports:
       - 80:80
       - 443:443
