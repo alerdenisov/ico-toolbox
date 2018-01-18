@@ -4,3 +4,4 @@ storage
 mongo
 redis
 .DS_Store
+certs
