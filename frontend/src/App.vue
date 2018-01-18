@@ -25,9 +25,9 @@ en:
           div(:class='b("content")')
             router-view(:class='b("view")')
     div(:class='b()' v-else)
-      el-main(:class='b("screen")')
-          div(:class='b("content")')
-            router-view(:class='b("view")')
+      el-main(:class='b("screen", { full: true })')
+          div(:class='b("content", { full: true })')
+            router-view(:class='b("view", { full: true })')
   div(:class='b()' v-else v-loading='true')
 </template>
 
@@ -224,6 +224,10 @@ h1, h2, h3, h4, h5, h6, p {
     }
     @media screen and (max-width: 480px){
       max-width: calc(100vw - 20px);
+    }
+
+    &--full {
+      max-width: none;
     }
   }
 
