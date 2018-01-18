@@ -6,6 +6,15 @@ en:
 
 <template lang="pug">
   div(:class="b()")
+    p(:class="b('subline')")
+      span(:class="b('gray')") CRYPTOCURRENCY FOR MUSIC INDUSTRY
+    h2(:class="b('header')") Private Pre-Sale of Musereum Tokens
+
+    div(:class="b('center')")
+      el-button() White Paper
+      el-button() One Pager
+      el-button() FAQ
+
     el-card(:class="b('box', 'dashboard-box--deadline')")
       span(:class="b('box-title')") Round ends
       countdown(:class="b('deadline-countdown')" :expireAt='expireAt')
