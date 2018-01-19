@@ -1,8 +1,8 @@
 <template lang="pug">
   el-dialog(
     :visible.sync='show'
-    width='50%'
-    center=''
+    width='100%'
+    center
     :class='b()'
     :before-close='handleClose')
     el-steps(:active='authStep' finish-status='success' simple='')
@@ -15,40 +15,43 @@
       label-position='top'
       ref='authForm'
       @submit.native.prevent='')
-      el-form-item(
-        prop='email'
-        v-if='authStep === 1'
-        label='Enter your email to sign in or create an account' 
-        label-width='100%'
-        @keydown.enter.prevent="true"
-        :rules="authRules.email")
-        el-autocomplete(
-          v-model='auth.email'
-          :fetch-suggestions="suggestMail"
-          style='width:100%'
-          @select='selectMail'
-          @keyup.enter.native='allowAuthNext ? authNext() : null')
-          template(slot="prepend")
-            i(class="el-icon-message")
+      transition(name="el-zoom-in-center")
+        el-form-item(
+          prop='email'
+          v-if='authStep === 1'
+          label='Enter your email to sign in or create an account' 
+          label-width='100%'
+          @keydown.enter.prevent="true"
+          :rules="authRules.email")
+          el-autocomplete(
+            v-model='auth.email'
+            :fetch-suggestions="suggestMail"
+            style='width:100%'
+            @select='selectMail'
+            @keyup.enter.native='allowAuthNext ? authNext() : null')
+            template(slot="prepend")
+              i(class="el-icon-message")
 
-      el-form-item(
-        prop='code'
-        v-if='authStep === 2'
-        :label='`An email with the code has been sent to ${auth.email}`'
-        label-width='100%'
-        @submit.prevent=""
-        :rules="authRules.code")
-        el-input(
-          v-model='auth.code' 
-          auto-complete='off' 
-          @keyup.enter.native='allowAuthNext ? authNext() : null')
-          template(slot="prepend")
-            i(class="el-icon-more")
+      transition(name="el-zoom-in-center")
+        el-form-item(
+          prop='code'
+          v-if='authStep === 2'
+          :label='`An email with the code has been sent to ${auth.email}`'
+          label-width='100%'
+          @submit.prevent=""
+          :rules="authRules.code")
+          el-input(
+            v-model='auth.code' 
+            auto-complete='off' 
+            @keyup.enter.native='allowAuthNext ? authNext() : null')
+            template(slot="prepend")
+              i(class="el-icon-more")
 
-      el-form-item(
-        v-if='authStep === 3'
-        label='Wait for a moment to verify entered code' 
-        label-width='100%')
+      transition(name="el-zoom-in-center")
+        el-form-item(
+          v-if='authStep === 3'
+          label='Wait for a moment to verify entered code' 
+          label-width='100%')
     
     span.dialog-footer(slot='footer')
       el-button(@click='handleClose') Cancel
@@ -163,6 +166,7 @@ export default {
       console.log(step)
     },
     handleClose (done) {
+      console.log('test')
       this.authStep = 1
       this.auth = {
         email: '',
@@ -182,6 +186,9 @@ export default {
 
 <style lang="scss">
 .auth-passwordless {
+  .el-dialog {
+    max-width: 450px;
+  }
   .el-dialog__header { display: none }
   .el-dialog__footer { padding-bottom: 15px }
   .el-step__head { line-height: 1.15 }

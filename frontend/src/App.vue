@@ -6,6 +6,8 @@ en:
   div(:class='b()' v-if='!loading')
     div(:class='b("wrapper")' v-if='session && profile')
       el-header(:class='b("header-wrapper")')
+        div(:class='b("logotype-wrapper")')
+          img(:class='b("logotype")' src="./assets/logo_white.png")
         div(:class='b("toggle-mobile")' @click='showMenu = !showMenu')
           awesome-icon(name='align-justify')
       el-container(:class='b("screen-wrapper")')
@@ -25,9 +27,9 @@ en:
           div(:class='b("content")')
             router-view(:class='b("view")')
     div(:class='b()' v-else)
-      el-main(:class='b("screen")')
-          div(:class='b("content")')
-            router-view(:class='b("view")')
+      el-main(:class='b("screen", { full: true })')
+          div(:class='b("content", { full: true })')
+            router-view(:class='b("view", { full: true })')
   div(:class='b()' v-else v-loading='true')
 </template>
 
@@ -225,6 +227,20 @@ h1, h2, h3, h4, h5, h6, p {
     @media screen and (max-width: 480px){
       max-width: calc(100vw - 20px);
     }
+
+    &--full {
+      max-width: none;
+    }
+  }
+
+  &__logotype-wrapper {
+    max-height: 50px;
+    margin-right: auto;
+  }
+
+  &__logotype {
+    display: block;
+    height: 50px;
   }
 
   &__sidebar {

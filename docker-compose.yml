@@ -17,8 +17,12 @@ services:
       - user
       - payments
       - sale
+    volumes:
+      - ./certs:/etc/letsencrypt
+      - ./certs/data:/data/letsencrypt
     ports:
       - 80:80
+      - 443:443
     restart: on-failure
   user:
     image: ${REPO_URL}ico-toolbox/user:${TAG}
@@ -64,6 +68,19 @@ services:
     build:
       context: ./backend
       dockerfile: docker/Dockerfile.sale
+    env_file: .env
+    links:
+      - mongo
+      - redis
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: on-failure
+  logs:
+    image: ${REPO_URL}ico-toolbox/logs:${TAG}
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile.logs
     env_file: .env
     links:
       - mongo

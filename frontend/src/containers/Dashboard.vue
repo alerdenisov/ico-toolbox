@@ -6,6 +6,15 @@ en:
 
 <template lang="pug">
   div(:class="b()")
+    p(:class="b('subline')")
+      span(:class="b('gray')") CRYPTOCURRENCY FOR MUSIC INDUSTRY
+    h2(:class="b('header')") Private Pre-Sale of Musereum Tokens
+
+    div(:class="b('buttons')")
+      a(href='https://drive.google.com/file/d/1ezwsLPgyyY4bro_CK6xFLkjgmKACvxHR/view' target='blank' :class="b('external', { type: 'white-paper' })") White Paper
+      //- a(href='https://tokensale.musereum.org:8443/' :class="b('external', { type: 'one-pager' })") One Pager
+      a(href='https://drive.google.com/file/d/1IjkZg3gD_zKMjqLjsLGARTXsebA4d6o0/view' target='blank' :class="b('external', { type: 'faq' })") FAQ
+
     el-card(:class="b('box', 'dashboard-box--deadline')")
       span(:class="b('box-title')") Round ends
       countdown(:class="b('deadline-countdown')" :expireAt='expireAt')
@@ -112,6 +121,20 @@ export default {
   justify-content: center;
   align-items: center;
 
+  &__subline {
+    color: #6B809C;
+  }
+  &__header {
+    font-size: 36px;
+    margin-bottom: 25px;
+  }
+  &__buttons {
+    margin-bottom: 50px;
+  }
+  &__external {
+    color: #409EFF;
+    padding: 10px;
+  }
   &__box-help,
   &__box-title {
     display: block;

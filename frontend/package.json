@@ -22,6 +22,7 @@
     "element-ui": "^2.0.10",
     "event-emitter": "^0.3.5",
     "inputmask-core": "^2.2.0",
+    "moment": "^2.20.1",
     "normalize.css": "^7.0.0",
     "v-money": "^0.8.1",
     "vue": "^2.5.2",

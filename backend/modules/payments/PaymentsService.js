@@ -90,6 +90,7 @@ class PaymentsService {
       sender: 'payments',
       message: 'create-wallet',
       args: {
+        currency,
         wallet,
         user
       }
@@ -123,9 +124,11 @@ class PaymentsService {
   }
 
   async transactionEvent(event, req, reply) {
-    let { status, txn_id, address, amount, currency } = event
+    let { status, txn_id, address, amount, currency, datetime } = event
     status = parseInt(status)
     amount = parseFloat(amount)
+
+    datetime = datetime || Math.trunc(new Date().getTime() / 1000)
 
     const isFailed = status < 0
     const isPending = !isFailed && status < 100
@@ -169,13 +172,14 @@ class PaymentsService {
       upsert: true
     })
 
-    await execRedis(this.redis, 'zadd', [`payments:transactions`, Date.now(), txn_id])
-    await execRedis(this.redis, 'zadd', [`payments:transactions:${userId}`, Date.now(), txn_id])
+    await execRedis(this.redis, 'zadd', [`payments:transactions`, datetime, txn_id])
+    await execRedis(this.redis, 'zadd', [`payments:transactions:${userId}`, datetime, txn_id])
     await execRedis(this.redis, 'set', [`payments:transaction:${txn_id}`, JSON.stringify(transaction)])
 
     transaction.userId = transaction.userId.toString()
-    this.saleClient.notifyTransaction(transaction)
-
+    if (status >= 100) {
+      this.saleClient.notifyTransaction(transaction)
+    }
     this.logs.send({
       sender: 'payments',
       message: 'ipn',
