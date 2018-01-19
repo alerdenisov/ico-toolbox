@@ -6,8 +6,8 @@ en:
   div(:class='b()' v-if='!loading')
     div(:class='b("wrapper")' v-if='session && profile')
       el-header(:class='b("header-wrapper")')
-        img(src="/assets/logo_white.png")
-        img(src="/logo_white.png")
+        div(:class='b("logotype-wrapper")')
+          img(:class='b("logotype")' src="./assets/logo_white.png")
         div(:class='b("toggle-mobile")' @click='showMenu = !showMenu')
           awesome-icon(name='align-justify')
       el-container(:class='b("screen-wrapper")')
@@ -231,6 +231,16 @@ h1, h2, h3, h4, h5, h6, p {
     &--full {
       max-width: none;
     }
+  }
+
+  &__logotype-wrapper {
+    max-height: 50px;
+    margin-right: auto;
+  }
+
+  &__logotype {
+    display: block;
+    height: 50px;
   }
 
   &__sidebar {
