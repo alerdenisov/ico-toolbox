@@ -6,13 +6,13 @@ module.exports = async function (db, userCollection) {
   await db.command({
     'collMod': userCollection.s.name,
     validator: {
-      userId: { $type: 'string' },
-      email: { $type: 'string' },
-      name: { $type: 'string' },
-      nickname: { $type: 'string' },
-      picture: { $type: 'string' },
-      gender: { $type: 'string' },
-      roles: { $type: 'array' }
+      // userId: { $type: 'string' },
+      // email: { $type: 'string' },
+      // name: { $type: 'string' },
+      // nickname: { $type: 'string' },
+      // picture: { $type: 'string' },
+      // gender: { $type: 'string' },
+      // roles: { $type: 'array' }
     }
   })
 

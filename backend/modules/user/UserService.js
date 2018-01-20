@@ -43,20 +43,35 @@ class UserService {
   }
 
   sanitazeId (sub) {
-    return stringToOjectId(sub)
+    return stringToOjectId(sub || Math.random().toString())
   }
 
   sanitazeProfile (profile) {
-    return {
-      userId: this.sanitazeId(profile.sub),
-      refId: md5(profile.email).substr(0, 5),
-      email: profile.email,
-      name: profile.given_name + ' ' + profile.family_name,
-      nickname: profile.nickname || (profile.given_name + ' ' + profile.family_name),
-      picture: profile.picture || 'https://developmentseed.org/images/team/avatar-placeholder.png',
-      gender: profile.gender || 'unknown',
-      roles: profile.roles
+    let { given_name, family_name, email, sub, nickname, roles, gender, picture, referrer } = profile
+    const userId = this.sanitazeId(sub)
+    const refId = md5(email).substr(0, 5)
+    const name = given_name && family_name ? given_name + ' ' + family_name : nickname
+    nickname = nickname || 'Unknown'
+    picture = picture || 'https://developmentseed.org/images/team/avatar-placeholder.png',
+    roles = Array.isArray(roles) ? roles : [ 'user' ]
+    gender = gender || 'unknown'
+
+    const result = {
+      userId,
+      refId,
+      email,
+      name,
+      nickname, 
+      picture,
+      gender,
+      roles
     }
+
+    if (referrer) {
+      result.referrer = referrer
+    }
+
+    return result
   }
 
   async updateProfile (profile, token, referrer) {
@@ -79,7 +94,7 @@ class UserService {
       writeResult = await this.userCollection
         .updateOne(
           { email: sanitazedProfile.email }, 
-          sanitazedProfile, 
+          { $set: { sanitazedProfile } }, 
           { upsert: true })
     } catch (e) {
       if (e.code === DUPLICATE_KEY_ERROR_CODE) {
@@ -100,9 +115,9 @@ class UserService {
       )
     }
 
-    if (!writeResult.modifiedCount && !writeResult.upsertedCount) {
-      throw boom.badRequest('Boh...')
-    }
+    // if (!writeResult.modifiedCount && !writeResult.upsertedCount) {
+    //   throw boom.badRequest('Boh...')
+    // }
     
     await execRedis(this.redis, 'set', [`users:profiles:${token}`, sanitazedProfile.userId])
   }
@@ -179,6 +194,20 @@ class UserService {
     }
 
     return this.userCollection.find({}).toArray()
+  }
+
+  async updateUser (req, reply) {
+    const user = await this.getProfile(req.headers.authorization)
+    
+    if (!user || user.roles.indexOf('admin') === -1) {
+      throw boom.badRequest('Not autherized request')
+    }
+
+    return await this.userCollection
+      .updateOne(
+        { email: req.body.email }, 
+        this.sanitazeProfile(req.body),
+        { upsert: true })
   }
 }
 
