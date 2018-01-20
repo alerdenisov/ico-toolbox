@@ -15,5 +15,6 @@ export default {
     sold: 0,
     raised: 0
   },
-  usedMails: []
+  usedMails: [],
+  refferer: null
 }

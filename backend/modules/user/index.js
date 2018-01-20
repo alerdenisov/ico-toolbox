@@ -30,6 +30,8 @@ module.exports = async function (fastify, opts) {
     data: opts
   })
 
+  fastify.register(require('fastify-formbody'))
+  
   fastify.register(async function (fastify, opts) {
     fastify.register(require('../../lib/fastify-auth0'), {
       AUTH0_DOMAIN: fastify.config.AUTH0_DOMAIN,
@@ -79,10 +81,22 @@ module.exports = async function (fastify, opts) {
 async function registerRoutes (fastify, opts) {
   fastify.use(require('../../lib/debug-response')('user'))
 
-  fastify.get('/login', async (req, reply) => {
+  fastify.get('/referrals', async (req, reply) => fastify.userService.getMyReferrals(req, reply))
+  fastify.get('/refId', async (req, reply) => fastify.userService.getMyRefId(req, reply))
+  fastify.post('/checkRef', async (req, reply) => fastify.userService.checkRefId(req, reply))
+  fastify.get('/referrer', async (req, reply) => fastify.userService.getMyReferrer(req, reply))
+  fastify.post('/getReferrals', async (req, reply) => {
+    if (req.secrect !== fastify.config.USER_SERVICE_SECRET) {
+      throw new Error('incorrect secret')
+    }
+    const userId = req.body.userId
+    const user = await fastify.userService.getUser(userId)
+    return await fastify.userService.getReferrals(user.refId)
+  })
+
+  fastify.post('/login', async (req, reply) => {
     const token = req.headers.authorization
     const profile = await fastify.auth0.profile(req.headers.authorization)
-    console.log(profile)
 
     fastify.logs.send({
       sender: 'user',
@@ -93,7 +107,7 @@ async function registerRoutes (fastify, opts) {
       }
     })
 
-    await fastify.userService.updateProfile(profile, token)
+    await fastify.userService.updateProfile(profile, token, req.body.referrer)
     return await fastify.userService.getProfile(token)
   })
 

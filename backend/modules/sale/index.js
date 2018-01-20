@@ -113,4 +113,8 @@ async function registerRoutes (fastify, opts) {
   fastify.get('/balance/:type', async (req, reply) => {
     return await fastify.saleService.getBalance(req.params.type, req, reply)
   })
+
+
+  fastify.get('/myReferralsTotal', async (req, reply) => fastify.saleService.myReferralsTotal(req, reply))
+  fastify.get('/myReferrerRank', async (req, reply) => fastify.saleService.myReferrerRank(req, reply))
 }
