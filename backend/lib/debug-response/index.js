@@ -6,6 +6,7 @@ module.exports = function (module) {
     if (req.headers) console.log('Headers: ', req.headers)
     if (req.params)  console.log('Params: ', req.params)
     if (req.query)   console.log('Query: ', req.query)
+    if (req.body)    console.log('Body: ', req.body)
     // console.log('Raw:', req)
     next()
   }

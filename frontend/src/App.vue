@@ -17,12 +17,12 @@ en:
             :class='b("menu")'
             :router='true'
             mode='vertical')
-            el-menu-item(index='dashboard' route='/dashboard') Sale
-            el-menu-item(index='contribute' route='/contribute') Contribute
-            //- el-menu-item(index='affilate' route='/affilate') Affilate
-            el-menu-item(index='transactions' route='/transactions') Transactions
-            el-menu-item(index='events' route='/events' v-if='isAdmin') Events Log
-            //- el-menu-item(index='contributors' route='/contributors' v-if='isAdmin') Contributors
+            el-menu-item(index='dashboard' :route='{ name: "Dashboard" }') Sale
+            el-menu-item(index='contribute' :route='{ name: "Contribute" }') Contribute
+            el-menu-item(index='affilate' :route='{ name: "Affilate" }') Affilate
+            el-menu-item(index='transactions' :route='{ name: "Transactions" }') Transactions
+            el-menu-item(index='events' :route='{ name: "Events" }' v-if='isAdmin') Events Log
+            //- el-menu-item(index='contributors' :route='/{ name: "contributors" }' v-if='isAdmin') Contributors
         el-main(:class='b("screen")')
           div(:class='b("content")')
             router-view(:class='b("view")')
@@ -83,7 +83,7 @@ export default {
         console.log('start check')
         this.loading = true
         await this.checkErrors()
-        await this.checkCoins()
+        this.checkCoins()
         await this.checkProfile()
         this.loading = false
         console.log('end check')
@@ -118,7 +118,7 @@ export default {
 
     async checkProfile () {
       if (this.session) {
-        const profile = (await this.$api.login(this.session)).data
+        const profile = (await this.$api.me(this.session)).data
         this.$store.dispatch(ACTION_TYPES.ReceiveProfile, profile)
       }
     }

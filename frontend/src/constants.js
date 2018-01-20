@@ -1,5 +1,5 @@
 export const ACTION_TYPES = {
-  Refferer: 'AUTH_REFFERER',
+  Referrer: 'AUTH_REFERRER',
   Authentication: 'AUTH_SET_SESSION',
   ReceiveProfile: 'AUTH_RECEIVE_PROFILE',
   UsedMail: 'AUTH_USED_MAIL',

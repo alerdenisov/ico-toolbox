@@ -12,7 +12,6 @@ ru:
   div(:class='b(mods)')
     h1(:class='b("title", mods)') {{ $t('title') }}
     p(:class='b("subtitle", mods)') {{ $t('subtitle', ['0.0.1']) }}
-    //- el-button(:class='b("auth-button", mods)' @click='showAuth') {{ $t('auth') }}
     auth-box(@session='gotSession')
     p(:class='b("disclaimer", mods)') {{ $t('disclaimer') }}
 </template>
@@ -24,7 +23,6 @@ import AuthBox from '@/components/AuthBox'
 export default {
   name: 'welcome',
   dependencies: ['$api'],
-  props: [],
   components: {
     AuthBox
   },

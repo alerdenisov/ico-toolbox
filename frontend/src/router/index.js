@@ -16,7 +16,7 @@ const nestedView = {
   render (c) { return c('router-view') }
 }
 
-function authentication(required) {
+function authentication () {
   return function (to, from, next) {
     if (!store.state.session) {
       return next({
@@ -26,7 +26,18 @@ function authentication(required) {
     } else {
       return next()
     }
+  }
+}
 
+function nonAuthentication () {
+  return function (to, from, next) {
+    if (store.state.session) {
+      return next({
+        path: '/app/dashboard'
+      })
+    } else {
+      return next()
+    }
   }
 }
 
@@ -38,6 +49,7 @@ const router = new Router({
     {
       path: '',
       component: nestedView,
+      beforeEnter: nonAuthentication(),
       // NonAuth
       children: [
         {
@@ -46,8 +58,8 @@ const router = new Router({
           component: Welcome,
           props: true
         },
-        { 
-          path: '/:ref',
+        {
+          path: '/:referrer',
           name: 'Referal',
           component: Referal,
           props: true
@@ -66,32 +78,32 @@ const router = new Router({
       // AuthOnly
       children: [
         {
-          path: '/dashboard',
+          path: 'dashboard',
           name: 'Dashboard',
           component: Dashboard
         },
         {
-          path: '/contribute',
+          path: 'contribute',
           name: 'Contribute',
           component: Contribute
         },
         {
-          path: '/affilate',
+          path: 'affilate',
           name: 'Affilate',
           component: Affilate
         },
         {
-          path: '/transactions',
+          path: 'transactions',
           name: 'Transactions',
           component: Transactions
         },
         {
-          path: '/contributors',
+          path: 'contributors',
           name: 'Contributors',
           component: Contributors
         },
         {
-          path: '/events',
+          path: 'events',
           name: 'Events',
           component: Events
         }

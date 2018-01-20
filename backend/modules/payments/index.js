@@ -109,7 +109,7 @@ async function registerRoutes (fastify, opts) {
     return fastify.paymentsService.getWallet(req.params.currency, req, reply)
   })
 
-  fastify.get('/wallet/:currency/create', async (req, reply) => {
+  fastify.post('/wallet/:currency/create', async (req, reply) => {
     return fastify.paymentsService.createWallet(req.params.currency, req, reply)
   })
 

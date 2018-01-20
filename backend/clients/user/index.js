@@ -21,6 +21,17 @@ module.exports = fp(async function (fastify, opts) {
         json: true,
         followRedirect: false
       }).then(r => r.body)
+    },
+
+    getReferrals: function (userId) {
+      return got(`${opts.USER_SERVICE_URL}/getReferrals`, {
+        method: 'POST',
+        json: true,
+        body: {
+          secret: opts.USER_SERVICE_SECRET,
+          userId
+        }
+      })
     }
   })
 })

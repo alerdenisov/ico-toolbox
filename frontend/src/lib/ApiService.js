@@ -14,6 +14,8 @@ export default class ApiService {
       axios.defaults.headers.common['Authorization'] = `${session.tokenType} ${session.accessToken}`
     }
 
+    axios.defaults.headers.common['Content-Type'] = 'application/json'
+
     if (typeof payload === 'undefined') {
       return axios[method.toLowerCase()](this.apiDomain + url)
     } else {
@@ -21,8 +23,10 @@ export default class ApiService {
     }
   }
 
-  login (session) {
-    return this._call(session, '/user/login', 'GET')
+  login (session, referrer) {
+    return this._call(session, '/user/login', 'POST', {
+      referrer
+    })
   }
 
   me (session) {
@@ -38,7 +42,7 @@ export default class ApiService {
   }
 
   createWallet (session, currency) {
-    return this._call(session, `/payments/wallet/${currency}/create`, 'GET')
+    return this._call(session, `/payments/wallet/${currency}/create`, 'POST', {})
   }
 
   transactions (session) {
@@ -66,5 +70,31 @@ export default class ApiService {
 
   logs (session) {
     return this._call(session, '/logs/logs', 'GET')
+  }
+
+  myRefId (session) {
+    return this._call(session, '/user/refId', 'GET')
+  }
+
+  myReferrer (session) {
+    return this._call(session, '/user/referrer', 'GET')
+  }
+
+  myReferrals (session) {
+    return this._call(session, '/user/referrals', 'GET')
+  }
+
+  myReferralsTotal (session) {
+    return this._call(session, '/sale/myReferralsTotal', 'GET')
+  }
+
+  myReferrerRank (session) {
+    return this._call(session, '/sale/myReferrerRank', 'GET')
+  }
+
+  checkRefId (refId) {
+    return this._call(null, '/user/checkRef', 'POST', {
+      refId
+    })
   }
 }

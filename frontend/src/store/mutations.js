@@ -2,7 +2,7 @@ import { MUTATION_TYPES } from '@/constants'
 import Vue from 'vue'
 
 export default {
-  [MUTATION_TYPES.Refferer] (state, ref) {
+  [MUTATION_TYPES.Referrer] (state, ref) {
     if (!state.refferer) {
       state.refferer = ref
     }

@@ -1,5 +1,6 @@
 const { execRedis } = require('../../lib/utils')
 const Boom = require('boom')
+const { forEach } = require('p-iteration')
 
 let ObjectId
 
@@ -19,6 +20,49 @@ class SaleService {
     this.redis = redis
     this.latestUpdate = 0
     ObjectId = mongo.ObjectId
+
+    this.calculateIndexes()
+  }
+
+  async calculateIndexes () {
+    const userBalances = {}
+    await forEach(await this.saleCollection.find({}).toArray(), async tx => {
+      userBalances[tx.userId] = userBalances[tx.userId] || {
+        tokens: 0,
+        contributed: 0
+      }
+
+      userBalances[tx.userId].tokens += tx.tokensAmount
+      userBalances[tx.userId].contributed += tx.btcAmount
+    })
+
+    await forEach(Object.keys(userBalances), async userId => {
+      await execRedis(this.redis, `set`, [`sale:${userId}:contributed`, userBalances[userId].contributed])
+      await execRedis(this.redis, `set`, [`sale:${userId}:tokens`, userBalances[userId].tokens])
+    })
+
+    
+    await forEach(Object.keys(userBalances), async userId => {
+      let total = 0
+      const referrals = (await this.userClient.getReferrals(userId)).body
+      await forEach(referrals, async referral => {
+        total += parseFloat(referral.contributed)
+      })
+
+      console.log(userId, total)
+
+      await execRedis(this.redis, `zadd`, [`sale:referrals`, total, userId])
+    })
+  }
+
+  async myReferralsTotal (req, reply) {
+    const user = await this.userClient.getUser(req)
+    return await execRedis(this.redis, 'zscore', [`sale:referrals`, user._id])
+  }
+  
+  async myReferrerRank (req, reply) {
+    const user = await this.userClient.getUser(req)
+    return await execRedis(this.redis, 'zrevrank', [`sale:referrals`, user._id])
   }
 
   async shipTokens (tx, req, reply) {
@@ -40,6 +84,9 @@ class SaleService {
     } else {
       await execRedis(this.redis, 'zadd', [`sale:${userId}:tokens:pending`, tokensAmount, txId])
     }
+
+    await execRedis(this.redis, `incrbyfloat`, [`sale:${userId}:contributed`, btcAmount])
+    await execRedis(this.redis, `incrbyfloat`, [`sale:${userId}:tokens`, tokensAmount])
 
     if (userId) {
       await this.saleCollection.updateOne({ txId }, {
@@ -89,6 +136,11 @@ class SaleService {
 
   async getBalance (type, req, reply) {
     const user = await this.userClient.getUser(req)
+
+    if (!user) {
+      throw new Error()
+    }
+
     const tx = await execRedis(this.redis, 'zrange', [`sale:${user._id}:tokens:${type}`, 0, -1, 'WITHSCORES'])
 
     return tx
