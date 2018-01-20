@@ -11,6 +11,7 @@ import Contributors from '@/containers/Contributors'
 import Referal from '@/containers/Referal'
 import Events from '@/containers/Events'
 import AuthenticationCallback from '@/containers/AuthenticationCallback'
+import Users from '@/containers/Users'
 
 const nestedView = {
   render (c) { return c('router-view') }
@@ -106,6 +107,11 @@ const router = new Router({
           path: 'events',
           name: 'Events',
           component: Events
+        },
+        {
+          path: 'users',
+          name: 'Users',
+          component: Users
         }
       ]
     }
