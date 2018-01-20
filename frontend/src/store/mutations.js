@@ -2,6 +2,11 @@ import { MUTATION_TYPES } from '@/constants'
 import Vue from 'vue'
 
 export default {
+  [MUTATION_TYPES.Refferer] (state, ref) {
+    if (!state.refferer) {
+      state.refferer = ref
+    }
+  },
   [MUTATION_TYPES.Authentication] (state, session) {
     state.session = session
   },
