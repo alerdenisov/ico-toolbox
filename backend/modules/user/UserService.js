@@ -170,6 +170,16 @@ class UserService {
     console.log(user)
     return !!user
   }
+
+  async allUsers (req, reply) {
+    const user = await this.getProfile(req.headers.authorization)
+
+    if (!user || user.roles.indexOf('admin') === -1) {
+      throw boom.badRequest('Not autherized request')
+    }
+
+    return this.userCollection.find({}).toArray()
+  }
 }
 
 module.exports = UserService
