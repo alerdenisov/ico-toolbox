@@ -103,6 +103,6 @@ export default class ApiService {
   }
 
   updateUser (session, model) {
-    return this._call(session, '/user/create', 'POST', model)
+    return this._call(session, '/user/update', 'POST', model)
   }
 }
