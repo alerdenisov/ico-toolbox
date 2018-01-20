@@ -97,4 +97,12 @@ export default class ApiService {
       refId
     })
   }
+
+  users (session) {
+    return this._call(session, '/user/all', 'GET')
+  }
+
+  createUser (session, model) {
+    return this._call(session, '/user/create', 'POST', model)
+  }
 }
