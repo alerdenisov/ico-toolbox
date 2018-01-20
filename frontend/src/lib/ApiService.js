@@ -102,7 +102,7 @@ export default class ApiService {
     return this._call(session, '/user/all', 'GET')
   }
 
-  createUser (session, model) {
+  updateUser (session, model) {
     return this._call(session, '/user/create', 'POST', model)
   }
 }
