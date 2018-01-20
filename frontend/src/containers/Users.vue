@@ -63,6 +63,7 @@ export default {
     newUser () {
       return {
         email: this.rawUser.email,
+        nickname: this.rawUser.email.split('@')[0],
         referrer: this.rawUser.referrer ? md5(this.rawUser.referrer).substr(0, 5) : null
       }
     },
