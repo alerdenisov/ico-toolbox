@@ -27,6 +27,19 @@ class UserService {
     this.userCollection = userCollection
     this.redis = redis
     ObjectId = mongo.ObjectId
+
+    this.prepareDb()
+  }
+
+  async prepareDb() {
+    const users = await this.userCollection.find({ refId: { $exists: false } }).toArray()
+
+    users.forEach(user => {
+      console.log('set refid for', user._id)
+      this.userCollection.update({ userId: user.userId }, {
+        $set: { refId: md5(user.email).substr(0, 5) }
+      })
+    })
   }
 
   sanitazeId (sub) {
