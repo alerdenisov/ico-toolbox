@@ -117,4 +117,7 @@ async function registerRoutes (fastify, opts) {
 
     return profile
   })
+
+  fastify.get('/all', async (req, reply) => fastify.userService.allUsers(req, reply))
+  fastify.post('/update', async (req, reply) => fastify.userService.updateUser(req, reply))
 }
