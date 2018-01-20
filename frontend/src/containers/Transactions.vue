@@ -1,11 +1,13 @@
 <template lang="pug">
   div(:class='b()' ref='container')
     el-card(:class="b('card')")
-      el-tabs(v-model='showType')
+      el-tabs(v-model='showType' v-if='isAdmin')
         el-tab-pane(label='Your', name='your')
           transaction-table(:transactions='myTransactions' ref='table' :maxHeight='maxHeight')
         el-tab-pane(label='25 latest' name='latest')
           transaction-table(:transactions='transactions' :maxHeight='maxHeight')
+      
+      transaction-table(:transactions='myTransactions' ref='table' :maxHeight='maxHeight' v-else)
 </template>
 
 <script>
@@ -26,8 +28,11 @@ export default {
     }
   },
   computed: {
+    isAdmin () {
+      return this.profile.roles && this.profile.roles.indexOf('admin') !== -1
+    },
     ...mapState([
-      'session'
+      'session', 'profile'
     ])
   },
   asyncComputed: {

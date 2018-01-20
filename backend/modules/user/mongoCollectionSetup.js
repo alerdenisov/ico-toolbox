@@ -18,4 +18,5 @@ module.exports = async function (db, userCollection) {
 
   await userCollection.createIndex({ userId: 1 }, {unique: true})
   await userCollection.createIndex({ email: 2 }, {unique: true})
+  await userCollection.createIndex({ refferer: 3 })
 }

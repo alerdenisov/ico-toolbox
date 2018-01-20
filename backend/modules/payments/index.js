@@ -22,8 +22,6 @@ module.exports = async function (fastify, opts) {
         'COINPAYMENTS_IPN_SECRET',
         'COINPAYMENTS_PRIVATE_KEY',
         'COINPAYMENTS_PUBLIC_KEY',
-        'COINPAYMENTS_IPN', 
-        'COINPAYMENTS_IPN_TIME',
         'LOGS_SERVICE_URL',
         'LOGS_SERVICE_SECRET'
       ],
@@ -37,8 +35,6 @@ module.exports = async function (fastify, opts) {
         COINPAYMENTS_IPN_SECRET: { type: 'string' },
         COINPAYMENTS_PRIVATE_KEY: { type: 'string' },
         COINPAYMENTS_PUBLIC_KEY: { type: 'string' },
-        COINPAYMENTS_IPN: { type: 'boolean' },
-        COINPAYMENTS_IPN_TIME: { type: 'integer' },
         LOGS_SERVICE_URL: { type: 'string' },
         LOGS_SERVICE_SECRET: { type: 'string' }
       }
@@ -52,8 +48,8 @@ module.exports = async function (fastify, opts) {
     fastify.register(require('../../lib/fastify-coinpayments'), {
       COINPAYMENTS_PRIVATE_KEY: fastify.config.COINPAYMENTS_PRIVATE_KEY,
       COINPAYMENTS_PUBLIC_KEY: fastify.config.COINPAYMENTS_PUBLIC_KEY,
-      COINPAYMENTS_IPN: fastify.config.COINPAYMENTS_IPN, 
-      COINPAYMENTS_IPN_TIME: fastify.config.COINPAYMENTS_IPN_TIME,
+      COINPAYMENTS_IPN: false, 
+      COINPAYMENTS_IPN_TIME: 0
     })
     // We need a connection database:
     // `fastify-mongodb` makes this connection and store the database instance into `fastify.mongo.db`

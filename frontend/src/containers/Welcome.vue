@@ -3,7 +3,7 @@ en:
   title: Welcome
   subtitle: Token Sale App v.{0}
   auth: Authenticate
-  disclaimer: "If you don't receive your own invite code feel free to contact us!"
+  disclaimer: "Please use same email as you used for waitlist"
 ru:
   title: Добро пожаловать 
 </i18n>

@@ -19,7 +19,7 @@ module.exports = async function (db, paymentsCollection, walletsCollection) {
     'collMod': paymentsName,
     validator: {
       // 'walletId': { $type: 'objectId' },
-      userId: { $type: 'objectId' },
+      // userId: { $type: 'objectId' },
       txId: { $type: 'string' },
       currency: { $type: 'string' },
       status: { $type: 'number' },

@@ -134,12 +134,8 @@ class PaymentsService {
     const isPending = !isFailed && status < 100
     const isComplete = status === 100
 
-    let userId = ObjectId.createFromHexString(await execRedis(this.redis, 'get', [`payments:wallets:${address}`]))
-
-    if (!userId) {
-      console.log('not found user')
-      userId = 'private user'
-    }
+    const userIdRaw = await execRedis(this.redis, 'get', [`payments:wallets:${address}`])
+    let userId = userIdRaw ? ObjectId.createFromHexString(userIdRaw) : null
 
     const walletData = await execRedis(this.redis, 'get', [`payments:${userId}:${currency}`])
     let btcRate = 0
@@ -176,7 +172,10 @@ class PaymentsService {
     await execRedis(this.redis, 'zadd', [`payments:transactions:${userId}`, datetime, txn_id])
     await execRedis(this.redis, 'set', [`payments:transaction:${txn_id}`, JSON.stringify(transaction)])
 
-    transaction.userId = transaction.userId.toString()
+    if (userId) {
+      transaction.userId = transaction.userId.toString()
+    }
+    
     if (status >= 100) {
       this.saleClient.notifyTransaction(transaction)
     }
