@@ -21,6 +21,7 @@ en:
             el-menu-item(index='contribute' :route='{ name: "Contribute" }') Contribute
             el-menu-item(index='affilate' :route='{ name: "Affilate" }') Affilate
             el-menu-item(index='transactions' :route='{ name: "Transactions" }') Transactions
+            el-menu-item(index='users' :route='{ name: "Users" }') Users
             el-menu-item(index='events' :route='{ name: "Events" }' v-if='isAdmin') Events Log
             //- el-menu-item(index='contributors' :route='/{ name: "contributors" }' v-if='isAdmin') Contributors
         el-main(:class='b("screen")')
